@@ -1,0 +1,79 @@
+<html>
+<head>
+<link rel="stylesheet"
+	href="//code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
+<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<script src="//code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
+<title>Error</title>
+
+</head>
+
+<body>
+	<p>
+	<h1>Please enter the code as sent to your cellphone</h1>
+	</p>
+
+	<section id="edit">
+		<div class="edit-top-border"></div>
+		<div class="row">
+			<div class="col-md-1"></div>
+			<div class="col-md-9 text-left">
+
+				<form method='POST' action='/confirm_subscribe_code'>
+
+					<input type='hidden' name='lat' value='<%= subscriber.lat %>' /> 
+					<input
+						type='hidden' name='long' value='<%= subscriber.long %>' /> 
+						<input
+						type='hidden' name='district' value='<%= subscriber.long %>' /> 
+						
+						<input
+						type='hidden' name='status' value='99' /> 
+						
+						<input type='hidden'
+						name='number' value='<%= subscriber.number %>' '/> 
+						
+						<input type='hidden'
+						name='first_name' value="<%= subscriber.first_name %>"/> 
+						
+						<input
+						type='hidden' name='last_name' value='<%= subscriber.last_name %>' /> 
+						
+						<input
+						type='hidden' name='email' value='<%= subscriber.email %>' /> 
+						
+						<input
+						type='hidden' name='address' value='<%= subscriber.address %>' /> 
+						
+						<input
+						type='hidden' name='city' value='<%= subscriber.city %>' /> 
+						
+						<input
+						type='hidden' name='state' value='<%= subscriber.state %>' /> 
+						
+						<input
+						type='hidden' name='zipcode' value='<%= subscriber.zipcode %>' />
+						<input type='hidden' name='district' value='<%=subscriber.district %>' />
+						<input type='hidden' name='confirmation_code' value='<%= subscriber.confirmation_code %>' />
+					<table>
+						<tr>
+							<td>Enter the code sent to your cellphone</td>
+							<td><input type="text" name="entered_code" value=""></td>
+						</tr>
+	
+						<tr>
+							<td></td>
+							<td><input type='submit' value='Save' /></td>
+						</tr>
+	
+					</table>
+
+				</form>
+				<hr />
+<p>You can also re-send the confirmation code</p>
+
+				<br>
+				<hr>
+				<br>
+</body>
+</html>

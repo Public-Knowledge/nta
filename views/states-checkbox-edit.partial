@@ -1,0 +1,212 @@
+
+									<input type="checkbox" value="00" name="state" 
+									<% if (campaign.targets.indexOf('00') > -1) { %>
+									checked
+									<% } %> >Nationwide<br/>
+									
+									<input type="checkbox" value="AL" name="state"
+									<% if (campaign.targets.indexOf('AL') > -1) { %>
+									checked
+									<% } %> >Alabama<br/>
+									<input type="checkbox" value="AK" name="state"
+									<% if (campaign.targets.indexOf('AK') > -1) { %>
+									checked
+									<% } %> >Alaska<br/>
+									<input type="checkbox" value="AZ" name="state"
+									<% if (campaign.targets.indexOf('AZ') > -1) { %>
+									checked
+									<% } %> >Arizona<br/>
+									<input type="checkbox" value="AR" name="state"
+									<% if (campaign.targets.indexOf('AR') > -1) { %>
+									checked
+									<% } %> >Arkansas<br/>
+									<input type="checkbox" value="CA" name="state"
+									<% if (campaign.targets.indexOf('CA') > -1) { %>
+									checked
+									<% } %> >California<br/>
+									<input type="checkbox" value="CO" name="state"
+									<% if (campaign.targets.indexOf('CO') > -1) { %>
+									checked
+									<% } %> >Colorado<br/>
+									<input type="checkbox" value="CT" name="state"
+									<% if (campaign.targets.indexOf('CT') > -1) { %>
+									checked
+									<% } %> >Connecticut<br/>
+									<input type="checkbox" value="DE" name="state"
+									<% if (campaign.targets.indexOf('DE') > -1) { %>
+									checked
+									<% } %> >Delaware<br/>
+									<input type="checkbox" value="DC" name="state"
+									<% if (campaign.targets.indexOf('DC') > -1) { %>
+									checked
+									<% } %> >District of Columbia<br/>
+									
+									<input type="checkbox" value="FL" name="state"
+									<% if (campaign.targets.indexOf('FL') > -1) { %>
+									checked
+									<% } %> >Florida<br/>
+									<input type="checkbox" value="GA" name="state"
+									<% if (campaign.targets.indexOf('GA') > -1) { %>
+									checked
+									<% } %> >Georgia<br/>
+									<input type="checkbox" value="HI" name="state"
+									<% if (campaign.targets.indexOf('HI') > -1) { %>
+									checked
+									<% } %> >Hawaii<br/>
+									<input type="checkbox" value="ID" name="state"
+									<% if (campaign.targets.indexOf('ID') > -1) { %>
+									checked
+									<% } %> >Idaho<br/>
+									<input type="checkbox" value="'IL" name="state"
+									<% if (campaign.targets.indexOf('IL') > -1) { %>
+									checked
+									<% } %> >Illinois<br/>
+									<input type="checkbox" value="IN" name="state"
+									<% if (campaign.targets.indexOf('IN') > -1) { %>
+									checked
+									<% } %> >Indiana<br/>
+									<input type="checkbox" value="IA" name="state"
+									<% if (campaign.targets.indexOf('IA') > -1) { %>
+									checked
+									<% } %> >Iowa<br/>
+									<input type="checkbox" value="KS" name="state"
+									<% if (campaign.targets.indexOf('KS') > -1) { %>
+									checked
+									<% } %> >Kansas<br/>
+									<input type="checkbox" value="KY" name="state"
+									<% if (campaign.targets.indexOf('KY') > -1) { %>
+									checked
+									<% } %> >Kentucky<br/>
+									<input type="checkbox" value="LA" name="state"
+									<% if (campaign.targets.indexOf('LA') > -1) { %>
+									checked
+									<% } %> >Louisiana<br/>
+									<input type="checkbox" value="ME" name="state"
+									<% if (campaign.targets.indexOf('ME') > -1) { %>
+									checked
+									<% } %> >Maine<br/>
+									<input type="checkbox" value="MD" name="state"
+									<% if (campaign.targets.indexOf('MD') > -1) { %>
+									checked
+									<% } %> >Maryland<br/>
+									<input type="checkbox" value="MA" name="state"
+									<% if (campaign.targets.indexOf('MA') > -1) { %>
+									checked
+									<% } %> >Massachusetts<br/>
+									<input type="checkbox" value="MI" name="state"
+									<% if (campaign.targets.indexOf('MI') > -1) { %>
+									checked
+									<% } %> >Michigan<br/>
+									<input type="checkbox" value="MN" name="state"
+									<% if (campaign.targets.indexOf('MN') > -1) { %>
+									checked
+									<% } %> >Minnesota<br/>
+									<input type="checkbox" value="MS" name="state"
+									<% if (campaign.targets.indexOf('MS') > -1) { %>
+									checked
+									<% } %> >Mississippi<br/>
+									<input type="checkbox" value="MO" name="state"
+									<% if (campaign.targets.indexOf('MO') > -1) { %>
+									checked
+									<% } %> >Missouri<br/>
+									<input type="checkbox" value="MT" name="state"
+									<% if (campaign.targets.indexOf('MT') > -1) { %>
+									checked
+									<% } %> >Montana<br/>
+									<input type="checkbox" value="NE" name="state
+									<% if (campaign.targets.indexOf('NE') > -1) { %>
+									checked
+									<% } %> ">Nebraska<br/>
+									<input type="checkbox" value="NV" name="state"
+									<% if (campaign.targets.indexOf('NV') > -1) { %>
+									checked
+									<% } %> >Nevada<br/>
+									<input type="checkbox" value="NH" name="state"
+									<% if (campaign.targets.indexOf('NH') > -1) { %>
+									checked
+									<% } %> >New Hampshire<br/>
+									<input type="checkbox" value="NJ" name="state"
+									<% if (campaign.targets.indexOf('NJ') > -1) { %>
+									checked
+									<% } %> >New Jersey<br/>
+									<input type="checkbox" value="NM" name="state"
+									<% if (campaign.targets.indexOf('NM') > -1) { %>
+									checked
+									<% } %> >New Mexico<br/>
+									<input type="checkbox" value="NY" name="state"
+									<% if (campaign.targets.indexOf('NY') > -1) { %>
+									checked
+									<% } %> >New York<br/>
+									<input type="checkbox" value="NC" name="state"
+									<% if (campaign.targets.indexOf('NC') > -1) { %>
+									checked
+									<% } %> >North Carolina<br/>
+									<input type="checkbox" value="ND" name="state"
+									<% if (campaign.targets.indexOf('ND') > -1) { %>
+									checked
+									<% } %> >North Dakota<br/>
+									<input type="checkbox" value="OH" name="state"
+									<% if (campaign.targets.indexOf('OH') > -1) { %>
+									checked
+									<% } %> >Ohio<br/>
+									<input type="checkbox" value="OK" name="state"
+									<% if (campaign.targets.indexOf('OK') > -1) { %>
+									checked
+									<% } %> >Oklahoma<br/>
+									<input type="checkbox" value="OR" name="state"
+									<% if (campaign.targets.indexOf('OR') > -1) { %>
+									checked
+									<% } %> >Oregon<br/>
+									<input type="checkbox" value="PA" name="state"
+									<% if (campaign.targets.indexOf('PA') > -1) { %>
+									checked
+									<% } %> >Pennsylvania<br/>
+									<input type="checkbox" value="RI" name="state"
+									<% if (campaign.targets.indexOf('RI') > -1) { %>
+									checked
+									<% } %> >Rhode Island<br/>
+									<input type="checkbox" value="SC" name="state"
+									<% if (campaign.targets.indexOf('SC') > -1) { %>
+									checked
+									<% } %> >South Carolina<br/>
+									<input type="checkbox" value="SD" name="state"
+									<% if (campaign.targets.indexOf('SD') > -1) { %>
+									checked
+									<% } %> >South Dakota<br/>
+									<input type="checkbox" value="TN" name="state"
+									<% if (campaign.targets.indexOf('TN') > -1) { %>
+									checked
+									<% } %> >Tennessee<br/>
+									<input type="checkbox" value="TX" name="state"
+									<% if (campaign.targets.indexOf('TX') > -1) { %>
+									checked
+									<% } %> >Texas<br/>
+									<input type="checkbox" value="UT" name="state"
+									<% if (campaign.targets.indexOf('UT') > -1) { %>
+									checked
+									<% } %> >Utah<br/>
+									<input type="checkbox" value="VT" name="state"
+									<% if (campaign.targets.indexOf('VT') > -1) { %>
+									checked
+									<% } %> >Vermont<br/>
+									<input type="checkbox" value="VA" name="state"
+									<% if (campaign.targets.indexOf('VA') > -1) { %>
+									checked
+									<% } %> >Virginia<br/>
+									<input type="checkbox" value="WA" name="state"
+									<% if (campaign.targets.indexOf('WA') > -1) { %>
+									checked
+									<% } %> >Washington<br/>
+									<input type="checkbox" value="WV" name="state"
+									<% if (campaign.targets.indexOf('WV') > -1) { %>
+									checked
+									<% } %> >West Virginia<br/>
+									<input type="checkbox" value="WI" name="state"
+									<% if (campaign.targets.indexOf('WI') > -1) { %>
+									checked
+									<% } %> >Wisconsin<br/>
+									<input type="checkbox" value="WY" name="state"
+									<% if (campaign.targets.indexOf('WY') > -1) { %>
+									checked
+									<% } %> >Wyoming<br/>
+		

@@ -1,0 +1,75 @@
+<html>
+<head>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
+<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<script src="//code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
+<title><%= title %></title>
+<script>
+  $(function() {
+    $( "#datepicker" ).datepicker();
+  });
+  </script>
+
+</head>
+
+<body>
+<p>
+<h1>Edit Campaign</h1>
+</p>
+
+<section id="edit">
+	<div class="edit-top-border"></div>
+	<div class="row">
+		<div class="col-md-1"></div>
+		<div class="col-md-9 text-left">
+
+
+
+
+<% campaigns.forEach(function(row){ %>
+	
+
+
+<form method='POST' action='/update_campaign'  enctype='multipart/form-data'>
+	<input type='hidden' id='campaign_id' value='<%= row.id %>'/>
+	<table>
+	
+		<tr>
+			<td>SMS Text</td>
+			<td><input type="text"  name = "sms" id="sms"  value="<%= row.sms %>" /></td>
+		</tr>
+		<tr><td>id</td><td><%= row.id %></td></tr>
+		<input type="hidden" name="id" value="<%= row.id %>">
+		<tr><td>Custom Connect Title</td><td>
+		<input type="text" name="connectCustomTitle" value="<%= row.connectCustomTitle %>"/></td></tr>
+		<tr><td>Connect Custom</td><td>
+		<input type="text" maxlength="12" name="connectCustom" value="<%= row.connectCustom %>"/></td></tr>
+		<tr><td>Send Date</td><td>
+		<input type="text" name="day" id="datepicker" value="<%= row.day %>"/>
+		</td></tr>
+		<tr><td>Send Time</td><td>
+		<input type="text" name="time" value="<%= row.time %>"/>
+		</td></tr>
+		
+		<tr><td>MP3 File</td><td>
+		<input type="file" name="mp3file" id="files"/>
+		<br> Currently set to <%= row.mp3_file_location %>
+		<input type="hidden" name="prevfile" value="<%= row.mp3_file_location %>">
+		</td>
+		</tr>
+		<tr><td align="left">Targets:
+		</td><td><a href="/edit-campaign-targets?id=<%= row.id %>">Edit targets for this campaign</a>
+		</tr>
+
+		
+		
+		<tr><td></td><td><input type='submit' value='Save'/></td></tr>
+
+	</table>
+
+</form>
+<hr/>
+<%})%>
+<a href="/campaigns"> View all campaigns</a>
+<br><hr><br>
+</body></html>

@@ -1,0 +1,83 @@
+<html>
+<head>
+<link rel="stylesheet"
+	href="//code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
+<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<script src="//code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
+<title>Confirm Reps</title>
+
+</head>
+
+<body>
+	<p>
+	<h1>Confirm Your Reps</h1>
+	</p>
+
+	<section id="edit">
+		<div class="edit-top-border"></div>
+		<div class="row">
+			<div class="col-md-1"></div>
+			<div class="col-md-9 text-left">
+
+				<form method='POST' action='/reps_confirmed'>
+
+					<input type='hidden' name='lat' value='<%= subscriber.lat %>' /> 
+					<input
+						type='hidden' name='long' value='<%= subscriber.long %>' /> 
+						
+						
+						<input
+						type='hidden' name='status' value='99' /> 
+						
+						<input type='hidden'
+						name='number' value='<%= subscriber.number %>' '/> 
+						
+						<input type='hidden'
+						name='first_name' value="<%= subscriber.first_name %>"/> 
+						
+						<input
+						type='hidden' name='last_name' value='<%= subscriber.last_name %>' /> 
+						
+						<input
+						type='hidden' name='email' value='<%= subscriber.email %>' /> 
+						
+						<input
+						type='hidden' name='address' value='<%= subscriber.address %>' /> 
+						
+						<input
+						type='hidden' name='city' value='<%= subscriber.city %>' /> 
+						
+						<input
+						type='hidden' name='state' value='<%= subscriber.state %>' /> 
+						
+						<input
+						type='hidden' name='zipcode' value='<%= subscriber.zipcode %>' />
+						<input type='hidden' name='district' value='<%=subscriber.district %>' />
+					<table>
+<tr>
+      <% reps.forEach(function(rep){ %>					
+						
+							<td><%= rep.title %> <%= rep.firstname %> <%= rep.lastname %></td>
+							<td><img align="left" height="275" 
+							src='http://theunitedstates.io/images/congress/225x275/<%= rep.bioguide_id %>.jpg'  
+							style="margin: 2px 30px;" width="225" /></td>
+							
+						
+		<%})%>
+</tr>		
+						<tr>
+							<td></td>
+							<td><input type='submit' value='Save' /></td>
+						</tr>
+
+					</table>
+
+				</form>
+				<hr />
+
+
+				<br>
+				<hr>
+				<br>
+</body>
+</html>

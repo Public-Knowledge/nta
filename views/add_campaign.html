@@ -1,0 +1,64 @@
+<html>
+<head>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
+<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<script src="//code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
+<title><%= title %></title>
+<script>
+  $(function() {
+    $( "#datepicker" ).datepicker();
+  });
+  </script>
+
+</head>
+
+<body>
+<p>
+<h1>New Alert Campaign</h1>
+</p>
+
+<section id="edit">
+	<div class="edit-top-border"></div>
+	<div class="row">
+		<div class="col-md-1"></div>
+		<div class="col-md-9 text-left">
+
+
+<form method='POST' action='/add_campaign'  enctype='multipart/form-data'>
+	
+	<table>
+	
+		<tr>
+			<td>SMS Text</td>
+			<td><input type="text"  name = "sms" id="sms"  value="" /></td>
+		</tr>
+		
+		<tr><td>Custom Connect Title</td><td>
+		<input type="text" name="connectCustomTitle" value=""/></td></tr>
+		<tr><td>Connect Custom</td><td>
+		<input type="text" maxlength="12" name="connectCustom" value=""/></td></tr>
+		<tr><td>Send Date</td><td>
+		<input type="text" name="day" id="datepicker" value=""/>
+		</td></tr>
+		<tr><td>Send Time</td><td>
+		<input type="text" name="time" value=""/>
+		</td></tr>
+		<tr><td>MP3 File</td><td>
+		<input type="file" name="mp3file" id="files"/>
+		</td>
+		
+		<tr><td colspan=2 align="left">Targets:
+		<br> choose states to target or check All</td>
+		</tr>
+		<tr><td>Targeting:</td>
+			<td align="left"> <% include states-checkbox.partial %>
+		</td></tr>
+<tr><td></td><td><input type='submit' value='Save'/></td></tr>
+	</table>
+
+</form>
+<hr/>
+
+
+<br><hr><br>
+</body></html>

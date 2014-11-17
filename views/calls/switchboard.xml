@@ -1,0 +1,32 @@
+<!-- <?php if(!$this->subscriber):?> -->
+<% if (subscriber.hasOwnProperty(error) ) { %>
+<Response>
+	<Say>Sorry, we could not find your legislator.</Say> 
+</Response>	
+<% } else if (campaign.hasOwnProperty(error) ) { %>
+<!-- <?php return; elseif(!$this->alert):?> -->
+ 
+<Response>
+	<Say>Sorry, we could not find the alert.</Say> 
+</Response>	
+ <% } else { %>
+ 
+<Response>
+<?php if(is_object($this->contact)):?>
+	<Say>Connecting you to the office of <?php echo $this->contact->firstname?> <?php echo $this->contact->lastname?></Say>
+	<?php if(APPLICATION_ENV == 'production'):?>
+	<Dial><?php echo $this->contact->phone?></Dial>
+	<?php else:?>
+	<Play>http://www.telephonetribute.com/audio/ring.wav</Play>
+	<Say>In production, <?php echo $this->contact->phone?> would have been dialed.</Say>
+	<?php endif;?>
+<?php else:?>
+	<?php if(APPLICATION_ENV == 'production'):?>
+	<Dial><?php echo $this->contact?></Dial>
+	<?php else:?>
+	<Play>http://www.telephonetribute.com/audio/ring.wav</Play>
+	<Say>In production, <?php echo $this->contact?> would have been dialed.</Say>
+	<?php endif;?>
+
+</Response>
+ <% }

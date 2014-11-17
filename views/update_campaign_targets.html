@@ -1,0 +1,54 @@
+			
+<html>
+<head>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
+<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<script src="//code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
+<title><%= title %></title>
+</head>
+
+<body>
+<p>
+<h1>Edit Campaign Targets</h1>
+</p>
+
+<section id="edit">
+	<div class="edit-top-border"></div>
+	<div class="row">
+		<div class="col-md-1"></div>
+		<div class="col-md-9 text-left">
+	
+
+
+<form method='POST' action='update_campaign_targets'  enctype='multipart/form-data'>
+	<input type='hidden' id='campaign_id' value='<%= campaign.id %>'/>
+	<input type='hidden' id='campaign_id' value='<%= campaign.sms %>'/>
+	<table>
+	
+		<tr>
+			<td>SMS Text: </td>
+			<td><em><%= campaign.sms %></em></td>
+		</tr>
+		<tr><td>id</td><td><%= campaign.id %></td></tr>
+		<input type="hidden" name="id" value="<%= campaign.id %>">
+		
+		<tr><td align="left">Targets:
+		</td><td>
+		
+		
+		<% include states-checkbox-edit.partial %>
+		
+</td>
+		</tr>
+
+		
+		
+		<tr><td></td><td><input type='submit' value='Save'/></td></tr>
+
+	</table>
+
+</form>
+<hr/>
+<a href="/campaigns"> View all campaigns</a>
+<br><hr><br>
+</body></html>

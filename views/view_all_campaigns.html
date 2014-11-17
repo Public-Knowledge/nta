@@ -1,0 +1,22 @@
+<html>
+<title><%= title %>
+</title>
+<body>
+
+<p>
+<h1>view all campaigns</h1>
+</p>
+
+<% campaigns.forEach(function(row){ %>
+	<p><a href="campaign?id=<%= row.id %>"><em><%= row.sms %></em></a>  - <%= row.send %> 
+	<% if (row.connectCustomTitle) { %>
+	- <%= row.connectCustomTitle %> 
+	<% } %>
+	<% if (row.connectCustom) { %>
+	- <%= row.connectCustom %>
+   <% } %>
+   
+   </p>
+<%})%>
+<br><hr><br>
+</body></html>

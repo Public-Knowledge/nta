@@ -1,0 +1,97 @@
+<html>
+<head>
+<link rel="stylesheet"
+	href="//code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
+<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<script src="//code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
+<title><%= title %></title>
+
+</head>
+
+<body>
+<table border="0" width="100%"><tr>
+<td>
+	<p>
+	<h1>Sign up for PK Mobile Action Alerts!</h1>
+	</p>
+	<p>Sometimes, things in Washington can change really quickly. Our mobile alert system sends your a text message when your elected officals need to hear from you most. We will never share your information with anyone else and only use this system at critical junctures. After you have signed up, please invite your friends to do the same!
+	
+	</p>
+	</td>
+	<td valign="top" align="left">
+	<img src="http://www.publicknowledge.org/files/images/mobile%20action%20alert%20explination.002-001.preview.jpg" alt="" width="500" height="281" />
+	
+	</td>
+	</tr>
+</table>
+	<section id="edit">
+		<div class="edit-top-border"></div>
+		<div class="row">
+			<div class="col-md-1"></div>
+			<div class="col-md-9 text-left">
+
+
+
+
+				<form method='POST' action='/add_subscriber'>
+
+					<input type='hidden' name='status' value='99' />
+					<!--  todo: re-calc lat and long & district -->
+					<!-- todo: parsley.js for form validation -->
+					<table>
+						<tr>
+							<td>Phone Number</td>
+							<td><input type="text" name="number" id="number" value="" /></td>
+						</tr>
+
+
+						<tr>
+							<td>First Name</td>
+							<td><input type="text" name="first_name" value="" /></td>
+						</tr>
+
+						<tr>
+							<td>Last Name</td>
+							<td><input type="text" name="last_name" value="" /></td>
+						</tr>
+						<tr>
+							<td>Email</td>
+							<td><input type="text" name="email" value="" /></td>
+						</tr>
+						<tr>
+							<td>Street Address</td>
+							<td><input type="text" name="address" value="" /></td>
+						</tr>
+
+						<tr>
+							<td>City</td>
+							<td><input type="text" name="city" value="" /></td>
+						</tr>
+
+						<tr>
+							<td>State</td>
+							<td> <% include states.partial %>
+							</td>
+						</tr>
+
+						<tr>
+							<td>Zip</td>
+							<td><input type="text" name="zipcode" value="" /></td>
+						</tr>
+
+						<tr>
+							<td></td>
+							<td><input type='submit' value='Submit' /></td>
+						</tr>
+
+					</table>
+
+				</form>
+				<hr />
+
+
+				<br>
+				<hr>
+				<br>
+</body>
+</html>
