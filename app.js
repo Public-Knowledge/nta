@@ -6,7 +6,8 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var multer  = require('multer');
 var xml = require('xml');
-
+var fs    = require('fs'),
+nconf = require('nconf');
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
@@ -27,23 +28,30 @@ app.set('view engine', 'html');
 app.set('views', path.join(__dirname, 'views'));
 app.engine('html', require('ejs').renderFile);
 app.set('port', process.env.PORT || 3000);
+
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'media'))); 
+//app.use("/media", express.static(__dirname + '/media'));
+
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
 	extended : false
 }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+//app.use('/static', express.static(__dirname + '/public/data'));
+	
 
-
+console.log("__dirname is ", __dirname);
 var dbHelper = require(__dirname + '/app/dbhelper');
 var twilioHelper = require(__dirname + '/app/twilio');
 var subscriberHelper = require(__dirname + '/app/subscriberhelper');
 var geocodeHelper = require(__dirname + '/app/geocode');
-//var callHelper = require(__dirname + '/app/callhelper');
+var callHelper = require(__dirname + '/app/callhelper');
 
-var routes = require('./routes/index');
-var users = require('./routes/users');
+//var routes = require('./routes/index');
+//var users = require('./routes/users');
+
 
 
 app.get('/', function(req, res) {
@@ -65,49 +73,100 @@ app.get('/subscribers', function(req, res) {
 });
 
 app.get('/connect', function(req, res) {
-	var subscriberNumber = req.param('From');
+	console.log("GET version of connect.");
+	console.log(req);
 	
-	//look for unsub or act command in body
-//	var action = req.param('Body');
-//	if (action.indexOf("stop") > -1){
-//		var unsub = callHelper.unsubscribe(subscriberNumber, function(subscriber) {
-//			res.render('unsubscribe.html', {
-//				subscriber : subscriber
-//			});
-//		});
+	if (req.param("connectCustom")){
+		console.log("got custom connect");
 		
-//	}else if (action.indexOf("act") > -1) {
-//		var act = callHelper.handleCampaignCall(subscriberNumber, function(subscriber) {
-	//res.set('Content-Type', 'text/xml');
-	res.render('calls/call.html', {
-					title: "this is a title"
+		var call =  {
+				campaign_id: req.param('campaign'),
+				number: req.param('From')
+				};
+		
+		var rows = subscriberHelper.handleOngoingCallCustom(call, function(call) {
+			res.render('calls/call-custom.html', {
+				call: call
 			});
-//		});
+		});
+	}else {
+	
+		var call =  {
+				campaign_id: req.param('campaign'),
+				number: req.param('From'),
+				target_set_id: req.param('cts'),
+				lat: req.param('lat'),
+				long: req.param('long')
+				};
 		
-//	} else {
-		//error, unknown!
-//	}
+		var rows = subscriberHelper.handleOngoingCallSunlight(call, function(call) {
+			res.render('calls/call-sunlight.html', {
+				call: call
+			});
+		});
+	}
 	
 });
 
+
+app.post('/connect', function(req, res) {
+
+	if (req.param("connectCustom")){
+		
+		var call =  {
+				campaign_id: req.param('campaign'),
+				number: req.param('From')
+				};
+		
+		var rows = subscriberHelper.handleOngoingCallCustom(call, function(call) {
+			res.render('calls/call-custom.html', {
+				call: call
+			});
+		});
+	}else {
+	
+		var call =  {
+				campaign_id: req.param('campaign'),
+				number: req.param('From'),
+				target_set_id: req.param('cts'),
+				lat: req.param('lat'),
+				long: req.param('long')
+				};
+		
+		var rows = subscriberHelper.handleOngoingCallSunlight(call, function(call) {
+			res.render('calls/call-sunlight.html', {
+				call: call
+			});
+		});
+	}
+	
+});
+
+
 app.get('/connects', function(req, res) {
-	var subscriberNumber = req.param('From');
+	var subscriber_number = req.param('From');
+	var action = "unknown";
 	
 	//look for unsub or act command in body
-	var action = req.param('Body');
+	if (req.param('Body')) {
+		
+		action = req.param('Body');
+	}
+
+
 	if (action.indexOf("stop") > -1){
-		var unsub = callHelper.unsubscribe(subscriberNumber, function(subscriber) {
+		var unsub = callHelper.unsubscribe(subscriber_number, function(subscriber) {
 			res.render('unsubscribe.html', {
 				subscriber : subscriber
 			});
 		});
 		
 	}else if (action.indexOf("act") > -1) {
-		var act = callHelper.handleCampaignCall(subscriberNumber, function(subscriber) {
-	//res.set('Content-Type', 'text/xml');
-	res.render('calls/call.html', {
-					title: "this is a title"
-			});
+		// to do
+		// look up the campaign & make call for that campaign
+		//var call = {};
+		var act = subscriberHelper.getSubscriberForCall(subscriber_number, function(call) {
+			callHelper.handleStartCall(call)
 		});
 		
 	} else {
@@ -130,6 +189,7 @@ app.get('/campaigns', function(req, res) {
 
 app.get('/campaign', function(req, res) {
 	campaign_id = req.param("id");
+	
 	var rows = dbHelper.getCampaignWithTargets(campaign_id, function(campaign) {
 		res.render('view_campaign_with_targets.html', {
 			title : "Campaign " + campaign_id,
@@ -166,6 +226,7 @@ app.get('/edit-campaign-targets', function(req, res) {
 	});	
 });
 
+
 //edit campaign targets
 //update_campaign
 
@@ -174,8 +235,6 @@ app.post('/update_campaign_targets',function(req, res) {
 			targets: req.param("state"),
 			id: req.param("id") };
 
-			console.log(campaign);
-		
 			dbHelper.updateCampaignTargetsFirst(campaign, 
 					 function lastone() { res.redirect('/campaign?id=' + campaign.id); });
 					
@@ -192,9 +251,8 @@ app.post('/add_campaign', function(req, res) {
 			connectCustom: req.param("connectCustom"),
 			target: req.param("state"),
 			sms: req.param("sms"),
-			mp3_file_location: req.files.mp3file.path};
+			audio: req.files.mp3file.path};
 		
-			console.log(campaign.mp3_file_location);	
 			
 			var timeParts = campaign.time.split(":");
 			var dateParts = campaign.day.split("/");
@@ -205,7 +263,7 @@ app.post('/add_campaign', function(req, res) {
 			tmp = d.getTime();
 			dateInEpoch = tmp / 1000;
 			campaign.dateInEpoch = dateInEpoch;
-			console.log(campaign);
+		
 			
 			dbHelper.addCampaign(campaign, function(campaign) {
 				res.render('view_campaign_with_targets.html', {
@@ -234,13 +292,15 @@ app.post('/update_campaign', function(req, res) {
 
 	// mp3File: req.files.mp3file.path
 	if (req.files.mp3file) {
-		console.log("Req.Files.Mp3file: " + req.files.mp3file.path);
-		console.log(campaign.mp3File);
-		campaign.mp3File = req.files.mp3file.path;
+	
+		campaign.audio = req.files.mp3file.path;
+	
+		
+		
 	} else {
-		console.log("Req.Files.Mp3file was not set");
-		console.log("set to: ", req.param("prevfile"));
-		campaign.mp3File = req.param("prevfile");
+		
+		campaign.audio = req.param("prevfile");
+		
 	}
 
 	var timeParts = campaign.time.split(":");
@@ -254,12 +314,8 @@ app.post('/update_campaign', function(req, res) {
 	campaign.dateInEpoch = dateInEpoch;
 
 	dbHelper.updateCampaign(campaign, function(campaign) {
-		res.render('view_campaign_with_targets.html', {
-			title : "Updated Campaign ",
-			campaign : campaign
-		});
+		 res.redirect('/campaign?id=' + campaign.id);
 	});
-
 });
 
 app.get('/edit-subscriber', function(req, res) {
@@ -276,7 +332,7 @@ app.get('/edit-subscriber', function(req, res) {
 //update_subscriber
 
 app.post('/update_subscriber', function(req, res) {
-	console.log(req.body);
+
 
 	//first_name, last_name, email, address, city, state, zip, lat, long, district, status, number, id
 	subscriberHelper.updateSubscriber(req.param("first_name"), req
@@ -327,7 +383,7 @@ app.post('/add_subscriber', function(req, res) {
 
 //reps confirmed. now send code via sms to confirm phone num
 app.post('/reps_confirmed', function(req, res) {
-	console.log(req.body);
+
 	user_number = req.param("number");
 	// Get 3 random numbers between 0 and 9
 	var confcode = "pk";
@@ -336,8 +392,14 @@ app.post('/reps_confirmed', function(req, res) {
 	var two = Math.floor((Math.random() * 100) + 1);
 	var three = Math.floor((Math.random() * 100) + 1);
 	confcode = confcode + one + two + three;
+
+	var keyString = 'user:' + user_number;
+	console.log("storing under ", keyString);
 	console.log(confcode);
-		var subscriber = {
+	
+	nconf.set(keyString, confcode);
+	
+	var subscriber = {
 			first_name : req.param("first_name"),
 			last_name : req.param("last_name"),
 			email : req.param("email"),
@@ -363,9 +425,16 @@ app.post('/reps_confirmed', function(req, res) {
 //confirm_subscribe_code
 app.post('/confirm_subscribe_code', function(req, res) {
 	console.log(req.body);
+	var user_number = req.param("number");
+	
+	var keyString = 'user:' + user_number;
+	
+
+	
 	entered_code = req.param("confirmation_code");
 	user_code = req.param("entered_code");
-
+	stored_code = nconf.get(keyString);
+	
 	var subscriber = {
 		first_name : req.param("first_name"),
 		last_name : req.param("last_name"),
@@ -374,7 +443,7 @@ app.post('/confirm_subscribe_code', function(req, res) {
 		city : req.param("city"),
 		state : req.param("state"),
 		zipcode : req.param("zipcode"),
-		number : req.param("number"),
+		number : user_number,
 		district : req.param("district"),
 		lat : req.param("lat"),
 		long : req.param("long"),
@@ -382,7 +451,7 @@ app.post('/confirm_subscribe_code', function(req, res) {
 	};
 
 	if (entered_code == user_code) {
-		console.log("codes match");
+	
 		
 		subscriberHelper.addSubscriber(subscriber, function(subscriber) {
 		res.render('thank_you.html', {

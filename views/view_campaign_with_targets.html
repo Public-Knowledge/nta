@@ -39,7 +39,7 @@
 		<%= campaign.time %>
 		</td></tr>
 		<tr><td>MP3 File</td><td>
-		<%= campaign.mp3_file_location %>
+		<a href="/data/<%= campaign.audio %>"><%= campaign.audio %></a>
 		</td>
 		<tr>
 		<td><b>Targets</b></td><td>
@@ -52,11 +52,30 @@
  	
 <%})%>		
 
+</td></tr>
+	<tr>
+<td>Targeted Reps </td>
+<td>
+
+
+<% campaign.targetedReps.forEach(function(t){ %>				
+ <%if (t == 0) { %>	
+ All<br>	
+ <% } else {  %>
+		<%= t %><br>
+ <% } %>
+ 	
+<%})%>
+
+</td>
+</tr>
+
 	</table>
 
 </form>
 <hr/>
 <a href="/edit-campaign?id=<%= campaign.id %>">Edit campaign <%= campaign.id %></a>
-
+<br>
+<a href="/campaigns">See all campaigns</a>
 <br><hr><br>
 </body></html>

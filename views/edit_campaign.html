@@ -53,8 +53,8 @@
 		
 		<tr><td>MP3 File</td><td>
 		<input type="file" name="mp3file" id="files"/>
-		<br> Currently set to <%= row.mp3_file_location %>
-		<input type="hidden" name="prevfile" value="<%= row.mp3_file_location %>">
+		<br> <a href="/data/<%= row.audio %>">Currently set to <%= row.audio %></a>
+		<input type="hidden" name="prevfile" value="<%= row.audio %>">
 		</td>
 		</tr>
 		<tr><td align="left">Targets:

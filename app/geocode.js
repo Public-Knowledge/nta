@@ -2,39 +2,56 @@
  * geocoding wrapper
  */
 
-  var SunlightClient = require('sunlight').SunlightClient;
 
+  var SunlightClient = require('sunlight').SunlightClient;
+  var fs    = require('fs'),
+  nconf = require('nconf');
   
 //var sunlight_api = require("sunlight-congress-api");
 //sunlight_api.init("e595c253eb19468c9f12d743f77226f1");
 
 var urlencode = require('urlencode');
 
+nconf.file('./sender/apidata.json');
 
 
 
 var getSubscriberReps = function(subscriber, renderFn) {
+	var lat;
+	var long;
+	var geocoderProvider = 'google';
+	var httpAdapter = 'https';	
+	var myKey = nconf.get('google:geoapikey')
+	var extra = {
+	    apiKey: myKey, 
+	    formatter: null
+	};
+	var geocoder = require('node-geocoder').getGeocoder(geocoderProvider, httpAdapter, extra);
+	console.log(subscriber.address, subscriber.city, subscriber.zipcode);
 	
-	var geo = geocodeAddress(subscriber.address, subscriber.city, subscriber.zipcode);
-	var lat = geo[0];
-	var long = geo[1];
-	
-	var sunlight = new SunlightClient("e595c253eb19468c9f12d743f77226f1");
-    
-	sunlight.legislators.allForLatLong(geo[0], geo[1], function(legs) {
-		 for (leg in legs) {
-			 if(legs[leg].district.indexOf(' ') <= 0){
+	geocoder.geocode({address: subscriber.address, city: subscriber.city, country: 'USA', zipcode: subscriber.zipcode}, function(err, res) {
+	    console.log(res);
+	    for (r in res) {
+		
+			long = res[r].longitude;
+			lat = res[r].latitude;
+	    }
+	    var sunlightApiKey = nconf.get('sunlight:apikey')
+	    var sunlight = new SunlightClient(sunlightApiKey);
+	    sunlight.legislators.allForLatLong(lat, long, function(legs) {
+	    	for (leg in legs) {
+	    		if(legs[leg].district.indexOf(' ') <= 0){
 				    console.log("Store district", legs[leg].district);
 				    subscriber.district = legs[leg].district;
 				}
 			 
 	        console.log(legs[leg].district + ' ' + legs[leg].firstname + ' ' + legs[leg].lastname);  
-		 }
-		 subscriber.lat = lat;
-		 subscriber.long = long;
-		 renderFn(subscriber, legs);
+	    	}
+	    	subscriber.lat = lat;
+	    	subscriber.long = long;
+	    	renderFn(subscriber, legs);
+	    });
     });
- 
 }
 
 var getSubscriberDistrict = function(lat, long, renderFn) {
@@ -47,12 +64,13 @@ var getSubscriberDistrict = function(lat, long, renderFn) {
 
 
 var geocodeAddress = function(address, city, zipcode){
-	var long = "-74.071380";
-	var lat = "40.686620";
-	return [lat, long]
+//	var long = "-74.071380";
+//	var lat = "40.686620";
+//	return [lat, long]
+	//https://maps.googleapis.com/maps/api/geocode/json?parameters
+	
 
 }
-
 
 
 var geocodeAddressB = function(address, city, zipcode){
@@ -76,28 +94,6 @@ var geocodeAddressB = function(address, city, zipcode){
 			    console.log('BODY: ' + chunk);
 			  });
 			});
-}
-
-var geocodeAddressA = function(address, city, zipcode, renderFn){
-	
-	
-
-
-//https://www.npmjs.org/package/node-geocoder
-	var geocoderProvider = 'google';
-	var httpAdapter = 'http';
-	// optionnal
-	var extra = {
-	    apiKey: 'YOUR_API_KEY', // for Mapquest, OpenCage, Google Premier
-	    formatter: null         // 'gpx', 'string', ...
-	};
-
-	var geocoder = require('node-geocoder').getGeocoder(geocoderProvider, httpAdapter, extra);
-
-	var success = function(data) {
-		console.log(data);
-	}	
-
 }
 
 exports.geocodeAddress = geocodeAddress;

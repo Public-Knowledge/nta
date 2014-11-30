@@ -3,10 +3,15 @@
  */
 
 var mysql = require('mysql');
+var fs    = require('fs'),
+nconf = require('nconf');
+
+nconf.file('./sender/apidata.json');
+
 var connection = mysql.createConnection({
-	host : 'localhost',
-	user : 'txtapp',
-	password : 'RKFDVrFFf2FRGwtC',
+	host : nconf.get('database:host'),
+	user : nconf.get('database:user'),
+	password : nconf.get('database:password'),
 	database : 'txtapp',
 	multipleStatements: true
 });
@@ -78,7 +83,8 @@ var getCampaign = function(campaign_id, renderFn) {
 var getCampaignWithTargets = function(campaign_id, renderFn) {
 	var campaign = {
 			id: campaign_id,
-			targets: []
+			targets: [],
+			targetedReps: []
 	}
 	var sql = 'select * from alert a, campaign_target_sets ct, target_sets t where a.`id` = ct.`alert_id` and t.`id` = ct.`target_set_id` and a.`id` ='
 			+ connection.escape(campaign_id);
@@ -109,9 +115,12 @@ var getCampaignWithTargets = function(campaign_id, renderFn) {
 			campaign.status = rows[r].status;
 			campaign.connectCustom = rows[r].connectCustom;
 			campaign.connectCustomTitle = rows[r].connectCustomTitle;
-			campaign.mp3_file_location = rows[r].mp3_file_location;
+			
 			campaign.targets.push(rows[r].geo_target);
-			 
+			campaign.targetedReps.push(rows[r].rep_id);
+			
+			campaign.audio = rows[r].audio;
+			
 			}
 		console.log(campaign);
 		renderFn(campaign);
@@ -121,13 +130,18 @@ var getCampaignWithTargets = function(campaign_id, renderFn) {
 
 var addCampaign = function(campaign, renderFn) {
 
-	var sql = 'insert into alert (sms, send, connectCustom, connectCustomTitle, mp3_file_location) ' +
+	var audioParts = campaign.audio.split("/");
+	// starts as 'public/data/2efb79e5d727a8e4026e702d0029499e1417374672194.mp3'
+	var myAudio = audioParts[2];
+	console.log("store audio: ", myAudio);
+	
+	var sql = 'insert into alert (sms, send, connectCustom, connectCustomTitle, audio) ' +
 	'values (' +
 	connection.escape(campaign.sms) + ',' +
 	connection.escape(campaign.dateInEpoch) + ',' +
 	connection.escape(campaign.connectCustom) + ',' +
 	connection.escape(campaign.connectCustomTitle) + ',' +
-	connection.escape(campaign.mp3_file_location) +')';
+	connection.escape(myAudio) +')';
 	console.log(sql);
 
 	connection.query(sql, function(err, result) {
@@ -172,11 +186,22 @@ var addCampaign = function(campaign, renderFn) {
 }
 
 var updateCampaign = function(campaign, renderFn) {
-
+	
+	var myAudio = campaign.audio;
+	
+	
+	if (campaign.audio.indexOf("/") > -1) {
+		var audioParts = campaign.audio.split("/");
+		// starts as 'public/data/2efb79e5d727a8e4026e702d0029499e1417374672194.mp3'
+		myAudio = audioParts[2];
+	}
+	console.log("store audio: ", myAudio);
+	
 	campaign.targets= [];
 	var sql = 'update alert set send=' + connection.escape(campaign.dateInEpoch)
 			+ ', connectCustomTitle =' + connection.escape(campaign.connectCustomTitle)
-			+ ', sms=' + connection.escape(campaign.sms) +', mp3_file_location=' + connection.escape(campaign.mp3File)
+			+ ', connectCustom =' + connection.escape(campaign.connectCustom)
+			+ ', sms=' + connection.escape(campaign.sms) +', audio=' + connection.escape(myAudio)
 			+ ' where id='
 			+ connection.escape(campaign.id);
 
@@ -288,6 +313,7 @@ var getCampaignTargets = function(campaign_id, renderFn) {
 		renderFn(campaign);
 	});			
 }
+
 
 exports.updateCampaignTargetsFirst = updateCampaignTargetsFirst;
 exports.updateCampaignTargets = updateCampaignTargets;

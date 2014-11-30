@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+	<Say>Calling <%= call.connectCustomTitle %></Say>
+    <Play>http://2bf9c4d6.ngrok.com/data/<%= call.audio %></Play>
+    <Say> Will call <%= call.connectCustomNumber %> </Say>
+      <Dial><%= call.connectCustomNumber %></Dial>
+    
+</Response>

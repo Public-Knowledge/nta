@@ -2,9 +2,16 @@
  * Handle Twilio
  */
 
+
+var fs    = require('fs'),
+nconf = require('nconf');
+
+nconf.file('./sender/apidata.json');
+
+
 var twilio = require('twilio');
-var accountSid = "";
-var authToken = "";
+var accountSid = nconf.get('twilio:accountSid');
+var authToken = nconf.get('twilio:authToken');
 
 var testTwilio = function(renderFn) {
 
