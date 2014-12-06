@@ -74,10 +74,10 @@ var getSubscriberForCall = function(number, renderFn) {
 	
 	//also need to get whether campaign has custom phone # to connect to
 	
-	var sql = 'select sub.`late`, sub.`long`, sub.`number`, c.audio, c.`connectCustom`, c.`connectCustomTitle`, cts.`target_set_id`,  s.alert_id, s.`sent_time` ' +
-		' from sent s, subscriber sub, alert c, campaign_target_sets cts ' + 
+	var sql = 'select sub.state, sub.`lat`, sub.`long`, sub.`number`,  s.alert_id, s.`sent_time` ' +
+		' from sent s, subscriber sub, alert c ' + 
 		' where sub.`user_id`= s.`user_id` and sub.`number` = ' + connection.escape(number) + '  and sub.`status`=1 and c.`id` = s.alert_id  ' +
-		' and cts.`alert_id` = c.`id` ORDER BY s.`sent_time` DESC limit 1;';
+		' ORDER BY s.`sent_time` DESC limit 1;';
 		
 		console.log(sql);
 	connection.query(sql, function(err, rows) {	
@@ -86,12 +86,10 @@ var getSubscriberForCall = function(number, renderFn) {
 		console.log("response ", rows);
 		var call =  {
 				campaign_id: rows[0].alert_id,
-				number: rows[0].number,
-				connectCustom: rows[0].connectCustom,
-				connectCustomTitle: rows[0].connectCustomTitle,
-				target_set_id: rows[0].target_set_id,
+				number: rows[0].number,				
 				lat: rows[0].lat,
-				long: rows[0].long
+				long: rows[0].long,
+				state: rows[0].state,
 				};
 		console.log("call: ", call);
 		renderFn(call);
@@ -163,7 +161,7 @@ var handleOngoingCallSunlight = function(call, renderFn) {
 		    	
 		    	call.targetType = rows[0].rep_id;
 		    	console.log("target type is ", call.targetType);
-				// 0 == all
+				// 4 == all
 				// 1 == senior senator
 				// 2 == junior senator
 				// 3 == represenative
@@ -238,6 +236,24 @@ first_name, last_name, email, address, city, state, zipcode, lat, long, district
 }
 
 
+
+var unsubscribe = function(subscriber_number, renderFn) {
+
+	
+	
+	var sql = 'update subscriber set status="0" where number=' + 
+		connection.escape(subscriber_number);
+
+	console.log(sql);
+
+	connection.query(sql, function(err, rows) {
+		if (err)
+			throw err;
+		renderFn(subscriber_number);
+	});
+}
+
+
 var addSubscriber = function(subscriber, renderFn) {
 
 	
@@ -270,6 +286,7 @@ var addSubscriber = function(subscriber, renderFn) {
 	});
 }
 
+exports.unsubscribe = unsubscribe;
 exports.handleOngoingCallSunlight = handleOngoingCallSunlight;
 exports.handleOngoingCallCustom = handleOngoingCallCustom;
 exports.handleOngoingCall = handleOngoingCall;

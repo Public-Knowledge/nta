@@ -1,0 +1,19 @@
+<Response>
+<Play><%= call.webhost %>/data/<%= call.audio %></Play>
+	<Gather action='<%= call.webhost %>/<%= call.action_url %>' method="GET">
+		
+ <% if (call.connectSenior == 1) { %>  
+		<Say>Press 1 to connect to your Senior Senator.</Say> 
+<% } %>
+ <% if (call.connectJunior == 1) { %> 
+		<Say>Press 2 to connect to your Junior Senator.</Say> 
+<% } %>
+ <% if (call.connectRep == 1) { %> 
+		<Say>Press 3 to connect to your Representative.</Say> 
+<% } %>
+ <% if (call.connectCustom == 1) { %> 
+		<Say>Press 5 to be connected to <%= call.customTitle %></Say> 
+<% } %>
+		<Say>Press 0 to replay this message.</Say>
+	</Gather>	
+</Response>

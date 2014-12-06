@@ -11,6 +11,10 @@ nconf = require('nconf');
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
+
+var passport = require('passport')
+, GoogleStrategy = require('passport-google').Strategy;
+
 console.log(process.env);
 
 var app = express();
@@ -39,7 +43,22 @@ app.use(bodyParser.urlencoded({
 	extended : false
 }));
 app.use(cookieParser());
-//app.use('/static', express.static(__dirname + '/public/data'));
+
+passport.use(new GoogleStrategy({
+    returnURL: 'http://www.example.com/auth/google/return',
+    realm: 'http://www.example.com/'
+  },
+  function(identifier, profile, done) {
+    User.findOrCreate({ openId: identifier }, function(err, user) {
+      done(err, user);
+    });
+  }
+));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+
 	
 
 console.log("__dirname is ", __dirname);
@@ -52,6 +71,18 @@ var callHelper = require(__dirname + '/app/callhelper');
 //var routes = require('./routes/index');
 //var users = require('./routes/users');
 
+
+//Redirect the user to Google for authentication.  When complete, Google
+//will redirect the user back to the application at
+//  /auth/google/return
+app.get('/auth/google', passport.authenticate('google'));
+
+//Google will redirect the user to this URL after authentication.  Finish
+//the process by verifying the assertion.  If valid, the user will be
+//logged in.  Otherwise, authentication has failed.
+app.get('/auth/google/return', 
+passport.authenticate('google', { successRedirect: '/',
+                                 failureRedirect: '/login' }));
 
 
 app.get('/', function(req, res) {
@@ -72,74 +103,106 @@ app.get('/subscribers', function(req, res) {
 	});
 });
 
-app.get('/connect', function(req, res) {
-	console.log("GET version of connect.");
-	console.log(req);
+
+
+
+app.post('/dial', function(req, res) {
+	console.log(req.body);
+	console.log("POST dial");
 	
-	if (req.param("connectCustom")){
-		console.log("got custom connect");
-		
-		var call =  {
-				campaign_id: req.param('campaign'),
-				number: req.param('From')
-				};
-		
-		var rows = subscriberHelper.handleOngoingCallCustom(call, function(call) {
-			res.render('calls/call-custom.html', {
-				call: call
-			});
-		});
-	}else {
-	
-		var call =  {
+	var call = {
+				lat: req.param('lat'),
+				long: req.param('long'),
 				campaign_id: req.param('campaign'),
 				number: req.param('From'),
-				target_set_id: req.param('cts'),
-				lat: req.param('lat'),
-				long: req.param('long')
-				};
-		
-		var rows = subscriberHelper.handleOngoingCallSunlight(call, function(call) {
-			res.render('calls/call-sunlight.html', {
+				state: req.param('state'),
+				digits: req.param('Digits')
+	  };
+	  console.log("call obj ", call);
+	  
+		var rows = callHelper.dialOutbound(call, function(call) {
+			res.render('calls/switchboard.html', {
 				call: call
 			});
 		});
-	}
-	
 });
 
 
-app.post('/connect', function(req, res) {
-
-	if (req.param("connectCustom")){
-		
-		var call =  {
-				campaign_id: req.param('campaign'),
-				number: req.param('From')
-				};
-		
-		var rows = subscriberHelper.handleOngoingCallCustom(call, function(call) {
-			res.render('calls/call-custom.html', {
+app.get('/dial', function(req, res) {
+	console.log(req.body);
+	console.log("get dial");
+	
+	var call = {
+				lat: req.param('lat'),
+				long: req.param('long'),
+				campaign_id: req.param('campaign_id'),
+				number: req.param('From'),
+				state: req.param('state'),
+				digits: req.param('Digits')
+	  };
+	  console.log("call obj ", call);
+	  if (call.digits == 0){
+	  
+		var rows = callHelper.generateSwitchboard(call, function(call) {
+			res.render('calls/switchboard.html', {
 				call: call
 			});
 		});
-	}else {
+	  
+	  }else if (call.digits == 5){
+	  //connect custom
+	  var rows = callHelper.dialOutboundCustom(call, function(call) {
+			res.render('calls/call.html', {
+				call: call
+			});
+		});
+	  } else{
+		var rows = callHelper.dialOutboundSunlight(call, function(call) {
+			res.render('calls/call.html', {
+				call: call
+			});
+		});
+		}
+});
+
+app.get('/connect', function(req, res) {
+	console.log("GET version of connect.");
+	console.log(req.body);
 	
 		var call =  {
 				campaign_id: req.param('campaign'),
 				number: req.param('From'),
-				target_set_id: req.param('cts'),
+				state: req.param('state'),
 				lat: req.param('lat'),
 				long: req.param('long')
 				};
 		
-		var rows = subscriberHelper.handleOngoingCallSunlight(call, function(call) {
-			res.render('calls/call-sunlight.html', {
+		var rows = callHelper.generateSwitchboard(call, function(call) {
+			res.render('calls/switchboard.html', {
 				call: call
 			});
 		});
-	}
+});
+
+app.post('/connect', function(req, res) {
+	console.log("POST version of connect.");
+	console.log(req.body);
 	
+		var call =  {
+				lat: req.param('lat'),
+				long: req.param('long'),
+				campaign_id: req.param('campaign'),
+				number: req.param('From'),
+				state: req.param('state')
+				};
+	
+	
+		
+		var rows = callHelper.generateSwitchboard(call, function(call) {
+			res.render('calls/switchboard.html', {
+				call: call
+			});
+		});
 });
 
 
@@ -153,11 +216,10 @@ app.get('/connects', function(req, res) {
 		action = req.param('Body');
 	}
 
-
 	if (action.indexOf("stop") > -1){
-		var unsub = callHelper.unsubscribe(subscriber_number, function(subscriber) {
+		var unsub = subscriberHelper.unsubscribe(subscriber_number, function(subscriber) {
 			res.render('unsubscribe.html', {
-				subscriber : subscriber
+				subscriber_number : subscriber_number
 			});
 		});
 		
@@ -249,7 +311,7 @@ app.post('/add_campaign', function(req, res) {
 			time : req.param("time"),
 			connectCustomTitle: req.param("connectCustomTitle"), 
 			connectCustom: req.param("connectCustom"),
-			target: req.param("state"),
+			targets: req.param("state"),
 			sms: req.param("sms"),
 			audio: req.files.mp3file.path};
 		
@@ -264,13 +326,10 @@ app.post('/add_campaign', function(req, res) {
 			dateInEpoch = tmp / 1000;
 			campaign.dateInEpoch = dateInEpoch;
 		
-			
-			dbHelper.addCampaign(campaign, function(campaign) {
-				res.render('view_campaign_with_targets.html', {
-					title : "New Campaign ",
-					campaign : campaign
+			dbHelper.addCampaign(campaign, function(campaign_id) {
+				res.redirect('/campaign?id=' + campaign_id);
 				});
-			});
+			
 });
 
 

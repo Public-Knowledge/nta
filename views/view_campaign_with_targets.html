@@ -43,39 +43,24 @@
 		</td>
 		<tr>
 		<td><b>Targets</b></td><td>
-<% campaign.targets.forEach(function(t){ %>				
- <%if (t == 0) { %>	
- All<br>	
- <% } else {  %>
-		<%= t %><br>
- <% } %>
- 	
-<%})%>		
-
-</td></tr>
-	<tr>
-<td>Targeted Reps </td>
-<td>
 
 
-<% campaign.targetedReps.forEach(function(t){ %>				
- <%if (t == 0) { %>	
- All<br>	
- <% } else {  %>
-		<%= t %><br>
- <% } %>
- 	
+<% campaign.targets.forEach(function(t){ %>
+  <% if (t.geo == 0) { %>        Nationwide	<% } else {  %> <%= t.geo %> <% } %>
+  <% if (t.repType == 4) { %>   All	 <% } %>
+  <%  if (t.repType == 1) { %> Senior Senator   <% }  %>
+  <%  if (t.repType == 2) { %>  Junior Senator  <% } %>
+  <%  if (t.repType == 3) { %>  House Rep       <% } %>
+  <br>
 <%})%>
 
-</td>
-</tr>
+</td></tr>
 
 	</table>
 
 </form>
-<hr/>
 <a href="/edit-campaign?id=<%= campaign.id %>">Edit campaign <%= campaign.id %></a>
 <br>
-<a href="/campaigns">See all campaigns</a>
+<% include footer-links.partial %>
 <br><hr><br>
 </body></html>

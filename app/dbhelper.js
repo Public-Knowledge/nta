@@ -47,6 +47,8 @@ var listCampaigns = function(renderFn) {
 	// connection.end();
 
 }
+
+
 var getCampaign = function(campaign_id, renderFn) {
 
 	var sql = 'SELECT * FROM alert WHERE id = '
@@ -84,7 +86,7 @@ var getCampaignWithTargets = function(campaign_id, renderFn) {
 	var campaign = {
 			id: campaign_id,
 			targets: [],
-			targetedReps: []
+	
 	}
 	var sql = 'select * from alert a, campaign_target_sets ct, target_sets t where a.`id` = ct.`alert_id` and t.`id` = ct.`target_set_id` and a.`id` ='
 			+ connection.escape(campaign_id);
@@ -115,9 +117,12 @@ var getCampaignWithTargets = function(campaign_id, renderFn) {
 			campaign.status = rows[r].status;
 			campaign.connectCustom = rows[r].connectCustom;
 			campaign.connectCustomTitle = rows[r].connectCustomTitle;
-			
-			campaign.targets.push(rows[r].geo_target);
-			campaign.targetedReps.push(rows[r].rep_id);
+			var targetSet = {
+					geo: rows[r].geo_target,
+					repType: rows[r].rep_id
+			}
+			campaign.targets.push(targetSet);
+		
 			
 			campaign.audio = rows[r].audio;
 			
@@ -129,11 +134,15 @@ var getCampaignWithTargets = function(campaign_id, renderFn) {
 }
 
 var addCampaign = function(campaign, renderFn) {
-
-	var audioParts = campaign.audio.split("/");
-	// starts as 'public/data/2efb79e5d727a8e4026e702d0029499e1417374672194.mp3'
-	var myAudio = audioParts[2];
+	var myAudio = campaign.audio;
+	if (campaign.audio.indexOf("/") > -1) {
+		var audioParts = campaign.audio.split("/");
+		// starts as 'public/data/2efb79e5d727a8e4026e702d0029499e1417374672194.mp3'
+		myAudio = audioParts[2];
+	}
 	console.log("store audio: ", myAudio);
+	
+	var update_targets_sql = "";
 	
 	var sql = 'insert into alert (sms, send, connectCustom, connectCustomTitle, audio) ' +
 	'values (' +
@@ -149,40 +158,37 @@ var addCampaign = function(campaign, renderFn) {
 			throw err;
 		console.log(result.insertId);
 		campaign.id=result.insertId;
-		campaign.targets= [];
-		
-		var target_sql = 'insert into target_sets (rep_id, geo_target) values ';
-		for  (state in campaign.target) { 
-			//hack, set to 1 for senate/rep type right now
-			target_sql = target_sql + '(1, '+ connection.escape(state) + '),';
-		 }
-		//take off trailing comma
-		 var len = target_sql.length;
-		target_sql = target_sql.substring(0,len-1);
-		
-		console.log(target_sql);
-		
-		connection.query(target_sql, function(err, tResult) {
-			if (err)
-				throw err;
-			console.log(tResult.insertId);
-			campaign.targetId = tResult.insertId;
-			var target2_sql = 'insert into campaign_target_sets (alert_id, target_set_id) values (' +
+	
+		if ((typeof campaign.targets) == 'object'){
+			console.log("Passed multiple targets: object");
 			
-			connection.escape(campaign.id) + ',' + 
-			 connection.escape(campaign.targetId) +
-			')';
-			console.log(target2_sql);
+			for (index = 0; index < campaign.targets.length; ++index) {
+				console.log(campaign.targets[index]);
+				update_targets_sql += "(" + connection.escape(campaign.id) + ", " + connection.escape(campaign.targets[index]) + "),";
+			}
+			//strip trailing comma
+			 var len = update_targets_sql.length;
+			update_targets_sql = update_targets_sql.substring(0,len-1);
+			console.log(update_targets_sql);
 			
-			connection.query(target2_sql, function(err, tcResult) {
+		} else {
+			//single target passed
+			update_targets_sql += "(" + connection.escape(campaign.id) + ", " + connection.escape(campaign.targets) + ")";
+		}
+		
+		console.log("insert is is " + update_targets_sql);
+		
+		var target_sql = 'insert into campaign_target_sets (alert_id, target_set_id) values ' +
+		update_targets_sql;
+	
+			connection.query(target_sql, function(err, tcResult) {
 				if (err)
 					throw err;
-				campaign.targets.push(campaign.target);
+				
 				console.log(campaign);
-				renderFn(campaign);
+				renderFn(campaign.id);
 			});
 		});
-	});
 }
 
 var updateCampaign = function(campaign, renderFn) {
@@ -231,7 +237,45 @@ var updateCampaignTargetsFirst= function(campaign,  renderFnB) {
 	
 }
 
+
 var updateCampaignTargets = function(campaign, renderFn) {
+	console.log("entering update campaign targets for campaign " + campaign.id);
+	var update_targets_sql = "";
+	
+	//target is either a single string, if 1 checkbox was checked, or an array. 
+	if ((typeof campaign.targets) == 'object'){
+		console.log("Passed multiple targets: object");
+		
+		for (index = 0; index < campaign.targets.length; ++index) {
+			console.log(campaign.targets[index]);
+			update_targets_sql += "(" + connection.escape(campaign.id) + ", " + connection.escape(campaign.targets[index]) + "),";
+		}
+		//strip trailing comma
+		 var len = update_targets_sql.length;
+		update_targets_sql = update_targets_sql.substring(0,len-1);
+		console.log(update_targets_sql);
+		
+	} else {
+		//single target passed
+		update_targets_sql += "(" + connection.escape(campaign.id) + ", " + connection.escape(campaign.targets) + ")";
+	}
+	
+	console.log("insert is is " + update_targets_sql);
+	
+	
+	
+	var insertsql = 'insert into campaign_target_sets (alert_id, target_set_id) values ' +
+	update_targets_sql;
+	connection.query(insertsql, function(err, inserted_results) {
+		if (err)
+			throw err;
+			renderFn(campaign);
+	});	
+	
+}
+
+
+var updateCampaignTargetsOld = function(campaign, renderFn) {
 	console.log("entering update campaign targets");
 	var index;
 	var states = "";
@@ -290,7 +334,9 @@ var getCampaignTargets = function(campaign_id, renderFn) {
 
 	var campaign = {
 			id: campaign_id,
-			targets: [] }
+			targets: [],
+			targetsOld: []
+	}
 	 
 	var sql = 'select * from alert a, campaign_target_sets ct, target_sets t where a.`id` = ct.`alert_id` and t.`id` = ct.`target_set_id` and a.`id` ='
 			+ connection.escape(campaign_id);
@@ -302,14 +348,14 @@ var getCampaignTargets = function(campaign_id, renderFn) {
 		for (r in rows) {
 			
 			campaign.sms = rows[r].sms;
-			campaign.connectSenior = rows[r].connectSenior;
-			campaign.connectJunior = rows[r].connectJunior;
-			campaign.connectRepresentative = rows[r].connectRepresentative;
-			
-			campaign.targets.push(rows[r].geo_target);
-			 
+			var targetSet = {
+					geo: rows[r].geo_target,
+					repType: rows[r].rep_id
 			}
-		console.log(campaign);
+			campaign.targetsOld.push(targetSet);
+			campaign.targets.push(rows[r].target_set_id);
+			}
+		console.log("fetched campaign to edit targets: ", campaign);
 		renderFn(campaign);
 	});			
 }

@@ -29,7 +29,7 @@
 			<td>SMS Text: </td>
 			<td><em><%= campaign.sms %></em></td>
 		</tr>
-		<tr><td>id</td><td><%= campaign.id %></td></tr>
+		<tr><td>Campaign ID</td><td><%= campaign.id %></td></tr>
 		<input type="hidden" name="id" value="<%= campaign.id %>">
 		
 		<tr><td align="left">Targets:
@@ -49,6 +49,8 @@
 
 </form>
 <hr/>
-<a href="/campaigns"> View all campaigns</a>
+<a href="/campaign?id=<%= campaign.id %>">View Campaign</a>
+<br>
+<% include footer-links.partial %>
 <br><hr><br>
 </body></html>
