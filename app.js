@@ -1,23 +1,33 @@
 var express = require('express');
+var http = require('http');
 var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
+var passport = require('passport');
+var googleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var multer  = require('multer');
-var xml = require('xml');
+var bodyParser   = require('body-parser');
+var session      = require('express-session');
 var fs    = require('fs'),
 nconf = require('nconf');
+nconf.file('./sender/apidata.json');
 
-var routes = require('./routes/index');
-var users = require('./routes/users');
+//var routes = require('./routes/index');
+//var users = require('./routes/users');
 
-var passport = require('passport')
-, GoogleStrategy = require('passport-google').Strategy;
+
+var logger = require('morgan');
+var multer  = require('multer');
 
 console.log(process.env);
 
 var app = express();
+app.use(cookieParser()); // read cookies (needed for auth)
+app.use(bodyParser()); // get information from html forms
+var sessionSecret = nconf.get('oauth:secret');
+
+
+// required for passport
+app.use(session({ secret:  sessionSecret}));
+
 app.use(multer({ dest: './public/data/',
 		rename: function (fieldname, filename) {
 	    return filename.replace(/\W+/g, '-').toLowerCase() + Date.now()
@@ -28,37 +38,15 @@ app.use(multer({ dest: './public/data/',
  */
 
 app.set('view engine', 'html');
-//view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.engine('html', require('ejs').renderFile);
 app.set('port', process.env.PORT || 3000);
 
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.static(path.join(__dirname, 'media'))); 
-//app.use("/media", express.static(__dirname + '/media'));
-
-
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({
-	extended : false
-}));
-app.use(cookieParser());
-
-passport.use(new GoogleStrategy({
-    returnURL: 'http://www.example.com/auth/google/return',
-    realm: 'http://www.example.com/'
-  },
-  function(identifier, profile, done) {
-    User.findOrCreate({ openId: identifier }, function(err, user) {
-      done(err, user);
-    });
-  }
-));
-
 app.use(passport.initialize());
 app.use(passport.session());
 
-
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'media'))); 
 	
 
 console.log("__dirname is ", __dirname);
@@ -68,32 +56,83 @@ var subscriberHelper = require(__dirname + '/app/subscriberhelper');
 var geocodeHelper = require(__dirname + '/app/geocode');
 var callHelper = require(__dirname + '/app/callhelper');
 
-//var routes = require('./routes/index');
-//var users = require('./routes/users');
 
 
-//Redirect the user to Google for authentication.  When complete, Google
-//will redirect the user back to the application at
-//  /auth/google/return
-app.get('/auth/google', passport.authenticate('google'));
+var client_id = nconf.get('oauth:client_id');
+var client_secret = nconf.get('oauth:client_secret');
+var redirect_path = nconf.get('oauth:redirect');
+var hostName = nconf.get('hostname');
+var redirect_url = hostName + redirect_path;
+console.log(redirect_url);
 
-//Google will redirect the user to this URL after authentication.  Finish
-//the process by verifying the assertion.  If valid, the user will be
-//logged in.  Otherwise, authentication has failed.
-app.get('/auth/google/return', 
-passport.authenticate('google', { successRedirect: '/',
-                                 failureRedirect: '/login' }));
-
-
-app.get('/', function(req, res) {
-
-	var twilioTest = twilioHelper.testTwilio(function(message) {
-		res.send('Hello World!');
-		res.send(message);
-	});
+// Passport session setup.
+//   To support persistent login sessions, Passport needs to be able to
+//   serialize users into and deserialize users out of the session.  Typically,
+//   this will be as simple as storing the user ID when serializing, and finding
+//   the user by ID when deserializing.  However, since this example does not
+//   have a database of user records, the complete Google profile is
+//   serialized and deserialized.
+passport.serializeUser(function(user, done) {
+	
+  	done(null, user);
 });
 
-app.get('/subscribers', function(req, res) {
+passport.deserializeUser(function(obj, done) {
+	
+  done(null, obj);
+});
+
+
+
+passport.use(new googleStrategy({
+    clientID: client_id,
+    clientSecret: client_secret,
+    callbackURL: redirect_url
+},
+function (accessToken, refreshToken, profile, done) {
+ 
+    process.nextTick(function () {
+     
+      return done(null, profile);
+    });
+    }
+));    
+    
+
+
+    
+app.get('/auth/google',
+  passport.authenticate('google', { scope: ['https://www.googleapis.com/auth/userinfo.profile',
+                                            'https://www.googleapis.com/auth/userinfo.email'] }),
+  function(req, res){	
+    // The request will be redirected to Google for authentication, so this
+    // function will not be called.
+  });
+
+app.get('/auth/google/callback', 
+	   passport.authenticate('google',  
+        { successRedirect: '/campaigns',
+        failureRedirect: '/login',
+        session: true }));
+
+
+app.get('/login', function(req, res){
+  res.redirect('/auth/google');
+});
+
+
+app.get('/logout', function(req, res){
+  req.logout();
+  res.redirect('/');
+});
+
+
+app.get('/',  function(req, res) {
+		res.render('homepage.html');
+
+});
+
+app.get('/subscribers', ensureAuthenticated, function(req, res) {
 
 	var rows = subscriberHelper.listSubscribers(function(rows) {
 		res.render('view_all_subscribers.html', {
@@ -102,9 +141,6 @@ app.get('/subscribers', function(req, res) {
 		});
 	});
 });
-
-
-
 
 app.post('/dial', function(req, res) {
 	console.log(req.body);
@@ -239,7 +275,7 @@ app.get('/connects', function(req, res) {
 
 
 
-app.get('/campaigns', function(req, res) {
+app.get('/campaigns', ensureAuthenticated, function(req, res) {
 
 	var rows = dbHelper.listCampaigns(function(rows) {
 		res.render('view_all_campaigns.html', {
@@ -249,7 +285,7 @@ app.get('/campaigns', function(req, res) {
 	});
 });
 
-app.get('/campaign', function(req, res) {
+app.get('/campaign', ensureAuthenticated, function(req, res) {
 	campaign_id = req.param("id");
 	
 	var rows = dbHelper.getCampaignWithTargets(campaign_id, function(campaign) {
@@ -261,7 +297,7 @@ app.get('/campaign', function(req, res) {
 });
 
 
-app.get('/edit-campaign', function(req, res) {
+app.get('/edit-campaign', ensureAuthenticated, function(req, res) {
 	campaign_id = req.param("id");
 
 	var rows = dbHelper.getCampaign(campaign_id, function(rows) {
@@ -272,13 +308,13 @@ app.get('/edit-campaign', function(req, res) {
 	});
 });
 
-app.get('/new-campaign', function(req, res) {
+app.get('/new-campaign', ensureAuthenticated, function(req, res) {
 		res.render('add_campaign.html', {
 			title : "New Campaign",		
 		});	
 });
 
-app.get('/edit-campaign-targets', function(req, res) {
+app.get('/edit-campaign-targets', ensureAuthenticated,  function(req, res) {
 	campaign_id = req.param("id");
 	var rows = dbHelper.getCampaignTargets(campaign_id, function(campaign) {
 		res.render('update_campaign_targets.html', {
@@ -292,7 +328,7 @@ app.get('/edit-campaign-targets', function(req, res) {
 //edit campaign targets
 //update_campaign
 
-app.post('/update_campaign_targets',function(req, res) {
+app.post('/update_campaign_targets', ensureAuthenticated, function(req, res) {
 	var campaign =  {
 			targets: req.param("state"),
 			id: req.param("id") };
@@ -304,7 +340,7 @@ app.post('/update_campaign_targets',function(req, res) {
 
 //add campaign
 
-app.post('/add_campaign', function(req, res) {
+app.post('/add_campaign', ensureAuthenticated, function(req, res) {
 	
 		var campaign =  {
 			day : req.param("day"),
@@ -337,7 +373,7 @@ app.post('/add_campaign', function(req, res) {
 
 // update_campaign
 
-app.post('/update_campaign', function(req, res) {
+app.post('/update_campaign', ensureAuthenticated, function(req, res) {
 
 	var campaign = {
 		target : req.param("state"),
@@ -349,13 +385,9 @@ app.post('/update_campaign', function(req, res) {
 		sms : req.param("sms")
 	};
 
-	// mp3File: req.files.mp3file.path
 	if (req.files.mp3file) {
 	
 		campaign.audio = req.files.mp3file.path;
-	
-		
-		
 	} else {
 		
 		campaign.audio = req.param("prevfile");
@@ -377,7 +409,7 @@ app.post('/update_campaign', function(req, res) {
 	});
 });
 
-app.get('/edit-subscriber', function(req, res) {
+app.get('/edit-subscriber', ensureAuthenticated, function(req, res) {
 	user_id = req.param("user_id");
 
 	var rows = subscriberHelper.getSubscriberById(user_id, function(rows) {
@@ -390,10 +422,8 @@ app.get('/edit-subscriber', function(req, res) {
 
 //update_subscriber
 
-app.post('/update_subscriber', function(req, res) {
+app.post('/update_subscriber', ensureAuthenticated, function(req, res) {
 
-
-	//first_name, last_name, email, address, city, state, zip, lat, long, district, status, number, id
 	subscriberHelper.updateSubscriber(req.param("first_name"), req
 			.param("last_name"), req.param("email"), req.param("address"), req
 			.param("city"), req.param("state"), req.param("zipcode"), req
@@ -526,6 +556,20 @@ app.post('/confirm_subscribe_code', function(req, res) {
 	}
 });
 
+
+
+// Simple route middleware to ensure user is authenticated.
+//   Use this route middleware on any resource that needs to be protected.  If
+//   the request is authenticated (typically via a persistent login session),
+//   the request will proceed.  Otherwise, the user will be redirected to the
+//   login page.
+function ensureAuthenticated(req, res, next) {
+	   	//console.log("in ensureAuth", req.isAuthenticated());
+    	//console.log("session data", req.session);
+    	//console.log("user data", req.user);
+  if (req.isAuthenticated()) { return next(); }
+  res.redirect('/login');
+}
 
 
 var server = app.listen(3000, function() {
