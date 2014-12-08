@@ -23,7 +23,7 @@ var app = express();
 app.use(cookieParser()); // read cookies (needed for auth)
 app.use(bodyParser()); // get information from html forms
 var sessionSecret = nconf.get('oauth:secret');
-
+var restricted_domain = nconf.get('oauth:restricted_domain');
 
 // required for passport
 app.use(session({ secret:  sessionSecret}));
@@ -567,7 +567,13 @@ function ensureAuthenticated(req, res, next) {
 	   	//console.log("in ensureAuth", req.isAuthenticated());
     	//console.log("session data", req.session);
     	//console.log("user data", req.user);
-  if (req.isAuthenticated()) { return next(); }
+    	
+   //current hack
+  //restrict access to authenticated sites by user email domain  
+  //could also use groups? https://developers.google.com/google-apps/provisioning/#retrieving_all_groups_for_a_member	
+  if (req.isAuthenticated() && req.user.emails[0].value.indexOf(restricted_domain) > -1) { 
+  	return next(); 
+  }
   res.redirect('/login');
 }
 
