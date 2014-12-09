@@ -2,25 +2,32 @@
   "name": "nta",
   "version": "1.0.0",
   "description": "textapp",
-  "hostname": "http://.ngrok.com",
+  "hostname": "http://NNNN.ngrok.com",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "oauth": {
+    "client_id": "google-oauth-client-id",
+    "client_secret": "google-client-secret",
+    "redirect": "/auth/google/callback",
+    "secret": "express session secret",
+    "restricted_domain": "restrict private pages to emails from this domain"
+  },
   "database": {
     "host": "localhost",
-    "user": "",
-    "password": ""
+    "user": "txtapp",
+    "password": "database password"
   },
   "twilio": {
-   "accountSid": "",
-   "authToken": "",
-   "fromNumber": ""
+   "accountSid": "SID",
+   "authToken": "authtoken",
+   "fromNumber": "twilio number"
   },
   "google": {
-   "geoapikey": ""
+   "geoapikey": "google geocode API key"
   },
   "sunlight": {
-   "apikey":""
+   "apikey":"sunlight api key"
   }
 
 }
