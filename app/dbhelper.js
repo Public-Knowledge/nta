@@ -16,18 +16,9 @@ var connection = mysql.createConnection({
 	multipleStatements: true
 });
 
-// connection.connect();
-
-// connection.query('select sms from alert where id=9', function(err, rows,
-// fields) {
-// if (err) throw err;
-// console.log('selected: ', rows[0]);
-// });
-
-// connection.end();
 
 var listCampaigns = function(renderFn) {
-	// connection.connect();
+
 	connection
 			.query(
 					'select sms,id,send,status,connectCustom,connectCustomTitle from alert',
@@ -43,8 +34,6 @@ var listCampaigns = function(renderFn) {
 						}
 						renderFn(rows);
 					});
-
-	// connection.end();
 
 }
 

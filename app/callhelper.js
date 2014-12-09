@@ -7,7 +7,7 @@
 var mysql = require('mysql');
 var SunlightClient = require('sunlight').SunlightClient;
 
-var Client = require('node-rest-client').Client;
+//var Client = require('node-rest-client').Client;
 var fs = require('fs'), nconf = require('nconf');
 
 nconf.file('./sender/apidata.json');
@@ -17,10 +17,8 @@ var hostName = nconf.get('hostname');
 var accountSid = nconf.get('twilio:accountSid');
 var authToken = nconf.get('twilio:authToken');
 var fromNumber = nconf.get('twilio:fromNumber');
-//dev override for testing
-//accountSid = "ACd3967671b70af900a43f25013c65a415";
-//authToken = "21c366cec3376fcbb4aa17238e6f2dc1";
-//fromNumber = "15005550006";
+
+
 
 
 

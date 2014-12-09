@@ -6,10 +6,7 @@
   var SunlightClient = require('sunlight').SunlightClient;
   var fs    = require('fs'),
   nconf = require('nconf');
-  
-//var sunlight_api = require("sunlight-congress-api");
-//sunlight_api.init("e595c253eb19468c9f12d743f77226f1");
-
+ 
 var urlencode = require('urlencode');
 
 nconf.file('./sender/apidata.json');

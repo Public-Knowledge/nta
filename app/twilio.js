@@ -8,7 +8,6 @@ nconf = require('nconf');
 
 nconf.file('./sender/apidata.json');
 
-
 var twilio = require('twilio');
 var accountSid = nconf.get('twilio:accountSid');
 var authToken = nconf.get('twilio:authToken');
