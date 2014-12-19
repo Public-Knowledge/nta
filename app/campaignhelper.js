@@ -12,7 +12,7 @@ var connection = mysql.createConnection({
 	host : nconf.get('database:host'),
 	user : nconf.get('database:user'),
 	password : nconf.get('database:password'),
-	database : 'txtapp',
+	database : nconf.get('database:database'),
 	multipleStatements: true
 });
 

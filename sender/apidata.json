@@ -16,6 +16,7 @@
   "database": {
     "host": "localhost",
     "user": "txtapp",
+    "database": "txtapp",
     "password": "database password"
   },
   "twilio": {
