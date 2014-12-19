@@ -1,15 +1,21 @@
 from twilio.rest import TwilioRestClient
 import MySQLdb as mdb
 import sys
-#import datetime
+import json
 from datetime import datetime, timedelta
 import us
 
 
+#read in configuration
+json_data=open('apidata.json');
+data = json.load(json_data)
+
+json_data.close()
+
 # Your Account Sid and Auth Token from twilio.com/user/account
-accountSid = ""
-authToken = ""
-myNumber = ""
+accountSid = data["twilio"]["accountSid"]
+authToken = data["twilio"]["authToken"];
+myNumber = data["twilio"]["fromNumber"];
 
 client = TwilioRestClient(accountSid, authToken)
 
@@ -33,8 +39,9 @@ class Subscriber(object):
   
   
 def insertSet(sql):
+  
         try:
-            con = mdb.connect('localhost', 'txtapp', 'pwd', 'txtapp');
+            con = mdb.connect(data["database"]["host"], data["database"]["user"], data["database"]["password"], data["database"]["user"]);
             with con:
                 cur = con.cursor(mdb.cursors.DictCursor)
                 cur.execute(sql)
@@ -51,7 +58,7 @@ def insertSet(sql):
                     
 def selectSet(sql):
         try:
-            con = mdb.connect('localhost', 'txtapp', 'RKFDVrFFf2FRGwtC', 'txtapp');
+            con = mdb.connect(data["database"]["host"], data["database"]["user"], data["database"]["password"], data["database"]["user"]);
             with con:
                 cur = con.cursor(mdb.cursors.DictCursor)
                 cur.execute(sql)
@@ -122,7 +129,7 @@ def campaignTimeWindowCheck(campaign):
         print "campaignStartTime < now";
         return True;
     else:
-        print "campaignStartTime >> now"
+        print "Will not send yet because campaignStartTime is later than current time"
         return False;
     
     
@@ -187,6 +194,11 @@ def sendAlertToSubscriber(campaign, subscriber):
  
     sentSid = sendSMSViaTwilio(campaign.sms, subscriber.phoneNumber, myNumber);
     insertSent(sentSid, campaign.id, subscriber.userid);
+
+
+
+
+
 
 campaigns = findUpcoming();
 for row in campaigns:

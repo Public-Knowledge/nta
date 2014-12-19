@@ -1,8 +1,6 @@
 <html>
 <head>
-<link rel="stylesheet" href="//code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
-<script src="//code.jquery.com/jquery-1.10.2.js"></script>
-<script src="//code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
+<% include header.partial %>
 <title><%= title %></title>
 <script>
   $(function() {
@@ -40,7 +38,11 @@
 		<tr><td>Send Date</td><td>
 		<input type="text" name="day" id="datepicker" value=""/>
 		</td></tr>
-		<tr><td>Send Time</td><td>
+		<tr><td>Send Time
+		<br> Enter time using 24 hour time format (i.e. 2:00 PM is 14:00)<br>
+		
+		</td>
+		<td>
 		<input type="text" name="time" value=""/>
 		</td></tr>
 		<tr><td>MP3 File</td><td>
