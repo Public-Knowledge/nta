@@ -50,7 +50,7 @@ app.use(express.static(path.join(__dirname, 'media')));
 	
 
 console.log("__dirname is ", __dirname);
-var dbHelper = require(__dirname + '/app/dbhelper');
+var campaignHelper = require(__dirname + '/app/campaignhelper');
 var twilioHelper = require(__dirname + '/app/twilio');
 var subscriberHelper = require(__dirname + '/app/subscriberhelper');
 var geocodeHelper = require(__dirname + '/app/geocode');
@@ -63,7 +63,7 @@ var client_secret = nconf.get('oauth:client_secret');
 var redirect_path = nconf.get('oauth:redirect');
 var hostName = nconf.get('hostname');
 var redirect_url = hostName + redirect_path;
-console.log(redirect_url);
+
 
 // Passport session setup.
 //   To support persistent login sessions, Passport needs to be able to
@@ -143,9 +143,7 @@ app.get('/subscribers', ensureAuthenticated, function(req, res) {
 });
 
 app.post('/dial', function(req, res) {
-	console.log(req.body);
-	console.log("POST dial");
-	
+
 	var call = {
 				lat: req.param('lat'),
 				long: req.param('long'),
@@ -154,8 +152,7 @@ app.post('/dial', function(req, res) {
 				state: req.param('state'),
 				digits: req.param('Digits')
 	  };
-	  console.log("call obj ", call);
-	  
+
 		var rows = callHelper.dialOutbound(call, function(call) {
 			res.render('calls/switchboard.html', {
 				call: call
@@ -165,8 +162,6 @@ app.post('/dial', function(req, res) {
 
 
 app.get('/dial', function(req, res) {
-	console.log(req.body);
-	console.log("get dial");
 	
 	var call = {
 				lat: req.param('lat'),
@@ -176,7 +171,7 @@ app.get('/dial', function(req, res) {
 				state: req.param('state'),
 				digits: req.param('Digits')
 	  };
-	  console.log("call obj ", call);
+
 	  if (call.digits == 0){
 	  
 		var rows = callHelper.generateSwitchboard(call, function(call) {
@@ -202,8 +197,6 @@ app.get('/dial', function(req, res) {
 });
 
 app.get('/connect', function(req, res) {
-	console.log("GET version of connect.");
-	console.log(req.body);
 	
 		var call =  {
 				campaign_id: req.param('campaign'),
@@ -221,8 +214,7 @@ app.get('/connect', function(req, res) {
 });
 
 app.post('/connect', function(req, res) {
-	console.log("POST version of connect.");
-	console.log(req.body);
+
 	
 		var call =  {
 				lat: req.param('lat'),
@@ -232,8 +224,6 @@ app.post('/connect', function(req, res) {
 				state: req.param('state')
 				};
 	
-	
-		
 		var rows = callHelper.generateSwitchboard(call, function(call) {
 			res.render('calls/switchboard.html', {
 				call: call
@@ -277,7 +267,7 @@ app.get('/connects', function(req, res) {
 
 app.get('/campaigns', ensureAuthenticated, function(req, res) {
 
-	var rows = dbHelper.listCampaigns(function(rows) {
+	var rows = campaignHelper.listCampaigns(function(rows) {
 		res.render('view_all_campaigns.html', {
 			title : "See Campaigns",
 			campaigns : rows
@@ -288,7 +278,7 @@ app.get('/campaigns', ensureAuthenticated, function(req, res) {
 app.get('/campaign', ensureAuthenticated, function(req, res) {
 	campaign_id = req.param("id");
 	
-	var rows = dbHelper.getCampaignWithTargets(campaign_id, function(campaign) {
+	var rows = campaignHelper.getCampaignWithTargets(campaign_id, function(campaign) {
 		res.render('view_campaign_with_targets.html', {
 			title : "Campaign " + campaign_id,
 			campaign : campaign
@@ -300,7 +290,7 @@ app.get('/campaign', ensureAuthenticated, function(req, res) {
 app.get('/edit-campaign', ensureAuthenticated, function(req, res) {
 	campaign_id = req.param("id");
 
-	var rows = dbHelper.getCampaign(campaign_id, function(rows) {
+	var rows = campaignHelper.getCampaign(campaign_id, function(rows) {
 		res.render('edit_campaign.html', {
 			title : "Edit Campaign",
 			campaigns : rows
@@ -316,7 +306,7 @@ app.get('/new-campaign', ensureAuthenticated, function(req, res) {
 
 app.get('/edit-campaign-targets', ensureAuthenticated,  function(req, res) {
 	campaign_id = req.param("id");
-	var rows = dbHelper.getCampaignTargets(campaign_id, function(campaign) {
+	var rows = campaignHelper.getCampaignTargets(campaign_id, function(campaign) {
 		res.render('update_campaign_targets.html', {
 			title : "Edit Campaign Targets",
 			campaign : campaign
@@ -333,7 +323,7 @@ app.post('/update_campaign_targets', ensureAuthenticated, function(req, res) {
 			targets: req.param("state"),
 			id: req.param("id") };
 
-			dbHelper.updateCampaignTargetsFirst(campaign, 
+			campaignHelper.updateCampaignTargetsFirst(campaign, 
 					 function lastone() { res.redirect('/campaign?id=' + campaign.id); });
 					
 });
@@ -362,7 +352,7 @@ app.post('/add_campaign', ensureAuthenticated, function(req, res) {
 			dateInEpoch = tmp / 1000;
 			campaign.dateInEpoch = dateInEpoch;
 		
-			dbHelper.addCampaign(campaign, function(campaign_id) {
+			campaignHelper.addCampaign(campaign, function(campaign_id) {
 				res.redirect('/campaign?id=' + campaign_id);
 				});
 			
@@ -404,7 +394,7 @@ app.post('/update_campaign', ensureAuthenticated, function(req, res) {
 	dateInEpoch = tmp / 1000;
 	campaign.dateInEpoch = dateInEpoch;
 
-	dbHelper.updateCampaign(campaign, function(campaign) {
+	campaignHelper.updateCampaign(campaign, function(campaign) {
 		 res.redirect('/campaign?id=' + campaign.id);
 	});
 });
@@ -447,7 +437,7 @@ app.get('/signup', function(req, res) {
 //new subscriber - look up reps - signup step #1
 
 app.post('/add_subscriber', function(req, res) {
-	console.log(req.body);
+
 
 	var subscriber = {
 		first_name : req.param("first_name"),
@@ -483,9 +473,7 @@ app.post('/reps_confirmed', function(req, res) {
 	confcode = confcode + one + two + three;
 
 	var keyString = 'user:' + user_number;
-	console.log("storing under ", keyString);
-	console.log(confcode);
-	
+
 	nconf.set(keyString, confcode);
 	
 	var subscriber = {
@@ -513,13 +501,11 @@ app.post('/reps_confirmed', function(req, res) {
 
 //confirm_subscribe_code
 app.post('/confirm_subscribe_code', function(req, res) {
-	console.log(req.body);
+	
 	var user_number = req.param("number");
 	
 	var keyString = 'user:' + user_number;
-	
 
-	
 	entered_code = req.param("confirmation_code");
 	user_code = req.param("entered_code");
 	stored_code = nconf.get(keyString);

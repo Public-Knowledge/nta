@@ -28,8 +28,6 @@
 
 <% campaigns.forEach(function(row){ %>
 	
-
-
 <form method='POST' action='/update_campaign'  enctype='multipart/form-data'>
 	<input type='hidden' id='campaign_id' value='<%= row.id %>'/>
 	<table>

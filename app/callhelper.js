@@ -33,12 +33,9 @@ var connection = mysql.createConnection({
 
 var handleStartCall = function(call) {
 
-	console.log("handleStartCall", call);
-	
 	var client = require('twilio')(accountSid, authToken);
 	var postUrl = hostName + '/connect?campaign=' + call.campaign_id  + "&lat=" + call.lat + "&long=" + call.long + "&state=" + call.state;
 	
-	console.log("will send twilio post URL ", postUrl)
 	///Place a phone call, and respond with TwiML instructions from the given URL
 	client.makeCall({
 	    to:call.number, // Any number Twilio can call
@@ -46,8 +43,7 @@ var handleStartCall = function(call) {
 	    url:   postUrl // A URL that produces an XML document (TwiML) which contains instructions for the call
 	}, function(err, responseData) {
 	    //executed when the call has been initiated.
-	    console.log("call from: ", responseData.from, " in callback."); // outputs "+14506667788"
-	    
+	  
 	});
 	
 }
@@ -56,11 +52,7 @@ var handleStartCall = function(call) {
 
 var dialOutboundSunlight = function(call, renderFn) {
 
-	//<Say>Calling <%= call.title %></Say>
-   
-//    <Say> Will call <%= call.number %> </Say>
-	
-	console.log("dialOutbound Sunlight", call);
+
 	//get sunlight rep 
 	 var sunlightApiKey = nconf.get('sunlight:apikey');
 	    var sunlight = new SunlightClient(sunlightApiKey);
@@ -69,7 +61,7 @@ var dialOutboundSunlight = function(call, renderFn) {
 	    var junior = {};
 	    var rep = {};
 	    sunlight.legislators.allForLatLong(call.lat, call.long, function(legs) {
-	    	console.log(legs);
+	    	
 	    	for (leg in legs) {
 	    		
 	    		if (legs[leg].district.indexOf('Senior') > -1) {	 
@@ -96,7 +88,7 @@ var dialOutboundSunlight = function(call, renderFn) {
 	    		call.title = rep.name;
 	    		call.number = rep.phone;
 	    	}
-	    	console.log("generating outbound dial: ", call);
+	   
 			renderFn(call);
 			
 	    });
@@ -105,21 +97,14 @@ var dialOutboundSunlight = function(call, renderFn) {
 
 var dialOutboundCustom = function(call, renderFn) {
 
-	
-	//<Say>Calling <%= call.title %></Say>
-	   
-//  <Say> Will call <%= call.number %> </Say>
-	
-	console.log("dialOutbound Custom", call);
-	var sql = 'SELECT c.connectCustom, c.connectCustomTitle FROM  alert c ' +
+		var sql = 'SELECT c.connectCustom, c.connectCustomTitle FROM  alert c ' +
 	'WHERE c.id=' + connection.escape(call.campaign_id);
 
-	console.log("sql: ", sql)
 
 	connection.query(sql, function(err, rows) {
 		if (err)
 			throw err;
-		console.log("db returned: ", rows);
+	
 		for (r in rows) {
 
 			if (rows[r].connectCustom){
@@ -134,14 +119,7 @@ var dialOutboundCustom = function(call, renderFn) {
 
 var generateSwitchboard = function(call, renderFn) {
 	
-	console.log("generating switchboard");
-	//var call =  {
-	//		campaign_id: req.param('campaign'),
-	//		number: req.param('From'),		
-	//		lat: req.param('lat'),
-	//		long: req.param('long'),
-	//	    state: req.param('state'),
-	//		};
+	
 	
 	call.webhost = hostName;
 
@@ -150,18 +128,16 @@ var generateSwitchboard = function(call, renderFn) {
 	"&long=" + call.long +
 	"&state=" + call.state;
 	
-	console.log("action url is ", call.action_url);
 	//find possible targets for campaign
 	//also get custom settings
 	var sql = 'SELECT c.audio, c.connectCustom, c.connectCustomTitle, ts.rep_id, ts.geo_target FROM  campaign_target_sets cts, target_sets ts, alert c ' +
 			'WHERE c.id=' + connection.escape(call.campaign_id) + ' and cts.alert_id=c.id and ts.id = cts.target_set_id';
 	
-	console.log("sql: ", sql)
+
 	
 	connection.query(sql, function(err, rows) {
 	if (err)
 		throw err;
-	console.log("db returned: ", rows);
 	
 	for (r in rows) {
 		
@@ -172,10 +148,9 @@ var generateSwitchboard = function(call, renderFn) {
 
 			call.connectCustom = 1;
 			call.customTitle = rows[r].connectCustomTitle;
-			console.log("connect Custom is ", call.connectCustom);
 			
 		}
-		console.log("geo: ", rows[r].geo_target);
+	
 		
 		//if nationwide or their state all is set, add senior/junior/rep to switchboard
 		
@@ -202,7 +177,7 @@ var generateSwitchboard = function(call, renderFn) {
 			}
 		}		
 	}
-	console.log("call before rendering XML", call);
+	
 	renderFn(call);
 });
 	

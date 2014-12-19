@@ -29,7 +29,6 @@ var listSubscribers = function(renderFn) {
 					function(err, rows) {
 						if (err)
 							throw err;
-						console.log(rows);
 						renderFn(rows);
 					});
 
@@ -79,11 +78,11 @@ var getSubscriberForCall = function(number, renderFn) {
 		' where sub.`user_id`= s.`user_id` and sub.`number` = ' + connection.escape(number) + '  and sub.`status`=1 and c.`id` = s.alert_id  ' +
 		' ORDER BY s.`sent_time` DESC limit 1;';
 		
-		console.log(sql);
+	
 	connection.query(sql, function(err, rows) {	
 		if (err)
 			throw err;
-		console.log("response ", rows);
+	
 		var call =  {
 				campaign_id: rows[0].alert_id,
 				number: rows[0].number,				
@@ -91,7 +90,7 @@ var getSubscriberForCall = function(number, renderFn) {
 				long: rows[0].long,
 				state: rows[0].state,
 				};
-		console.log("call: ", call);
+	
 		renderFn(call);
 	});
 
@@ -100,22 +99,19 @@ var getSubscriberForCall = function(number, renderFn) {
 
 
 var handleOngoingCallCustom = function(call, renderFn) {
-	console.log("in custom call handler", call);
+	
 	//also need to get whether campaign has custom phone # to connect to
 	
 	var sql = 'select c.audio, c.`connectCustom`, c.`connectCustomTitle` from  alert c where c.`id` = ' 
 		+ connection.escape(call.campaign_id) + ' limit 1;';
 		
-		console.log(sql);
-		
 	connection.query(sql, function(err, rows) {	
 		if (err)
 			throw err;
-		console.log("response ", rows);
+
 		call.connectCustomNumber = rows[0].connectCustom;
 		call.connectCustomTitle = rows[0].connectCustomTitle;
 		call.audio = rows[0].audio;
-		console.log("call: ", call);
 		renderFn(call);
 	});
 
@@ -128,12 +124,11 @@ var handleOngoingCallSunlight = function(call, renderFn) {
 	var sql = 'select * from  alert c, target_sets ts, campaign_target_sets cts ' +
 	'where c.`id` =' + connection.escape(call.campaign_id) +   
 	'and c.id = cts.`alert_id` and ts.`id` = cts.`target_set_id` limit 1';
-	
-		console.log(sql);
+
 	connection.query(sql, function(err, rows) {	
 		if (err)
 			throw err;
-		console.log("response ", rows);
+
 		call.audio = rows[0].audio;
 		
 		//get sunlight rep 
@@ -160,7 +155,7 @@ var handleOngoingCallSunlight = function(call, renderFn) {
 		    	}
 		    	
 		    	call.targetType = rows[0].rep_id;
-		    	console.log("target type is ", call.targetType);
+		
 				// 4 == all
 				// 1 == senior senator
 				// 2 == junior senator
@@ -168,7 +163,7 @@ var handleOngoingCallSunlight = function(call, renderFn) {
 				
 				if (call.targetType == 1){
 					call.repNumber = senior.phone;
-					console.log(call.repNumber);
+					
 				} else if (call.targetType == 2){
 					call.repNumber = junior.phone
 				} else if (call.targetType == 3){
@@ -189,11 +184,11 @@ var handleOngoingCall = function(call, renderFn) {
 		' where sub.`user_id`= s.`user_id` and sub.`number` = ' + connection.escape(number) + '  and sub.`status`=1 and c.`id` = s.alert_id  ' +
 		' and cts.`alert_id` = c.`id` ORDER BY s.`sent_time` DESC limit 1;';
 		
-		console.log(sql);
+	
 	connection.query(sql, function(err, rows) {	
 		if (err)
 			throw err;
-		console.log("response ", rows);
+	
 		var call =  {
 				campaign_id: rows[0].alert_id,
 				number: rows[0].number,
@@ -201,7 +196,7 @@ var handleOngoingCall = function(call, renderFn) {
 				connectCustomTitle: rows[0].connectCustomTitle,
 				target_set_id: rows[0].target_set_id
 				};
-		console.log("call: ", call);
+	
 		renderFn(call);
 	});
 
