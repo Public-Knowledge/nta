@@ -34,14 +34,12 @@ class Subscriber(object):
     state = ""
     lat =""
     long= ""
-
-  
-  
+ 
   
 def insertSet(sql):
   
         try:
-            con = mdb.connect(data["database"]["host"], data["database"]["user"], data["database"]["password"], data["database"]["user"]);
+            con = mdb.connect(data["database"]["host"], data["database"]["user"], data["database"]["password"], data["database"]["database"]);
             with con:
                 cur = con.cursor(mdb.cursors.DictCursor)
                 cur.execute(sql)
@@ -114,8 +112,8 @@ def sendSMSViaTwilio(message, toNumber, fromNumber):
     
     mysid = client.messages.create(body=message,
                                      to=toNumber,    
-                                     from_=fromNumber) # Replace with your Twilio number
-    #print mysid;
+                                     from_=fromNumber) 
+    
     return mysid;
     
 def campaignTimeWindowCheck(campaign):
@@ -173,12 +171,7 @@ def subscriberTimeWindow(campaign, subscriber):
             print "can send ", campaign.id, " because ", nowTime, " > ", campaignStartTimePacific.time(); 
             return True;
      
-     
-     #if user is in central, check time +1
-     
-     #if user is in mountain, check time +3
-     
-     #if user is in pacific (lumping in AK & HI), check time +4   
+    
 
 def checkAlertSentForSubscriber(campaign, subscriber):
      already_sent = "select * from sent where alert_id =" + str(campaign.id) + " and user_id = " + str(subscriber.userid);
@@ -194,10 +187,6 @@ def sendAlertToSubscriber(campaign, subscriber):
  
     sentSid = sendSMSViaTwilio(campaign.sms, subscriber.phoneNumber, myNumber);
     insertSent(sentSid, campaign.id, subscriber.userid);
-
-
-
-
 
 
 campaigns = findUpcoming();

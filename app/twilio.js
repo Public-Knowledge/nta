@@ -18,7 +18,7 @@ var testTwilio = function(renderFn) {
 
 	client.messages.create({
 		to : '+',
-		from : '(520) 447-4670',
+		from : nconf.get('twilio:fromNumber'),
 		body : 'Hello World'
 	}, function(error, message) {
 		if (error) {
@@ -35,7 +35,7 @@ var sendConfCode = function(subscriber, renderFn) {
 
 	client.messages.create({
 		to : subscriber.number,
-		from : '(520) 447-4670',
+		from : nconf.get('twilio:fromNumber'),
 		body : 'Please enter this confirmation code: '+ subscriber.confirmation_code,
 	}, function(error, message) {
 		if (error) {
