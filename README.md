@@ -14,6 +14,10 @@
 9. if developing locally, install ngrok, which is used to expose localhost URLs to twilio, etc: https://ngrok.com/
 10. start up ngrok:  ./ngrok 3000
 
+##Server Configuraton
+
+The application needs to write MP3 files for the Twilio outgoing phonecalls to a directory.  That directory is currently [app root]/public/data. Therefore, you'll want to make sure that the app has write permission to that folder.
+
 ##App Configuraton
 
 First find your copy of the configuration file at [package root]/sender/apidata.json.  You'll notice that it has a number of fields which need to be filled out to connect to the various services used by the application.
