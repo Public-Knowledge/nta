@@ -4,6 +4,7 @@
 
 
   var SunlightClient = require('sunlight').SunlightClient;
+  var api = require("sunlight-congress-api");
   var fs    = require('fs'),
   nconf = require('nconf');
  
@@ -32,21 +33,38 @@ var getSubscriberReps = function(subscriber, renderFn) {
 			long = res[r].longitude;
 			lat = res[r].latitude;
 	    }
-	    var sunlightApiKey = nconf.get('sunlight:apikey')
-	    var sunlight = new SunlightClient(sunlightApiKey);
-	    sunlight.legislators.allForLatLong(lat, long, function(legs) {
-	    	for (leg in legs) {
-	    		if(legs[leg].district.indexOf(' ') <= 0){
-				    
-				    subscriber.district = legs[leg].district;
-				}
-			 
-	       
+		var api = require("sunlight-congress-api");
+		
+		var sunlightApiKey = nconf.get('sunlight:apikey');
+		console.log("sunlight key is ", sunlightApiKey);
+		console.log("lat - long:", lat, long);
+		api.init(sunlightApiKey);
+		api.legislatorsLocate().explain();
+		
+		console.log(api);
+		
+		//https://congress.api.sunlightfoundation.com/legislators/locate?apikey=e595c253eb19468c9f12d743f77226f1&latitude=38.8812813&longitude=-77.1096712
+		
+		api.legislatorsLocate().fields("district", "district");
+	   
+	   	api.legislatorsLocate().filter("latitude", lat).filter("longitude", long).call(function(data){ 
+	   
+   			 console.log(data.results.length);
+  			 for (leg in data.results) {
+  			 	//console.log("rep: ", data.results[leg]);
+  			 	//console.log("district: ", data.results[leg].district);
+  				if (data.results[leg].district){
+  				
+	    			 subscriber.district = data.results[leg].district;
+	    			 console.log("set district to ", subscriber.district);
+	    		 }
 	    	}
 	    	subscriber.lat = lat;
 	    	subscriber.long = long;
-	    	renderFn(subscriber, legs);
-	    });
+	    	renderFn(subscriber, data.results);
+		});
+	
+	    	
     });
 }
 
